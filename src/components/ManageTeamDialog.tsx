@@ -1,20 +1,73 @@
-// components.tsx
-import { Button } from "@/components/ui/button";
-import { useInviteMemberForm, useUpdateTeamNameForm } from "@/hooks/layoutHooks";
-import type { Restaurant } from "@/types/retaurant";
+import { useAuth } from "@/context/AuthContext";
+import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Member } from "@/types/member";
+import { useFormik } from "formik";
+import api from "@/lib/api/api";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import fetchMembers from "@/lib/api/fetchMembers";
+import fetchRestaurants from "@/lib/api/fetchRestaurants";
 
-export const ManageTeamDialog = ({ selectedRestaurantAuth, selectedRestaurant, members, inviteError, setInviteError }:
-    {
-        selectedRestaurantAuth: Restaurant | undefined,
-        selectedRestaurant: string | undefined, members: Member[],
-        inviteError: string | null, setInviteError: React.Dispatch<React.SetStateAction<string | null>>
-    }) => {
-    const updateTeamName = useUpdateTeamNameForm(selectedRestaurantAuth, selectedRestaurant);
-    const inviteMemberForm = useInviteMemberForm(selectedRestaurant, setInviteError);
+export default function ManageTeamDialog() {
+    const { selectedRestaurant } = useAuth();
+    const queryClient = useQueryClient();
+    const members = useQuery({
+        queryKey: ['members', selectedRestaurant],
+        queryFn: fetchMembers
+    })
+
+    const [inviteError, setInviteError] = useState<string | null>(null);
+
+    const updateTeamName = useFormik({
+        initialValues: {
+            newName: selectedRestaurant?.name,
+            teamId: selectedRestaurant
+        },
+        enableReinitialize: true,
+        onSubmit: (values) => {
+            api.put(`/teams/name`, values, { withCredentials: true })
+                .then((response) => {
+                    console.log(response);
+                    queryClient.invalidateQueries({
+                        queryKey: ['restaurants']
+                    });
+                })
+                .catch((error) => {
+                    console.log(error);
+                })
+        }
+    })
+
+    const inviteMemberForm = useFormik({
+        initialValues: {
+            teamId: selectedRestaurant,
+            username: '',
+            role: 'member'
+        },
+        enableReinitialize: true,
+        onSubmit: (values) => {
+            api.post('/teams/invite', values, { withCredentials: true })
+                .then((response) => {
+                    console.log(response);
+                    setInviteError(null);
+                })
+                .catch((error) => {
+                    console.log(error);
+                    setInviteError("Failed to invite member. Please try again.");
+                })
+        },
+    })
+
+    if (!selectedRestaurant) {
+        return null;
+    }
+
+    if (members.isLoading) {
+        return <div>Loading...</div>
+    }
+
 
     return (
         <Dialog>
@@ -31,7 +84,7 @@ export const ManageTeamDialog = ({ selectedRestaurantAuth, selectedRestaurant, m
                     </DialogDescription>
                 </DialogHeader>
                 <div>
-                    {selectedRestaurantAuth?.type === 'owner' && (
+                    {selectedRestaurant?.type === 'owner' && (
                         <>
                             <div>
                                 <h1 className="text-gray-800">Change restaurant name</h1>
@@ -56,7 +109,7 @@ export const ManageTeamDialog = ({ selectedRestaurantAuth, selectedRestaurant, m
 
                             <div className="mt-8">
                                 <h1 className="text-gray-800">Invite a Member</h1>
-                                <h2 className="mb-4 text-xs text-gray-700">Invite a member to the restaurant</h2>
+                                <h2 className="mb-4 text-xs text-gray-700">Invite a member to the resataurant</h2>
 
                                 <form onSubmit={inviteMemberForm.handleSubmit}>
                                     <div className="flex items-center gap-2">
@@ -79,18 +132,21 @@ export const ManageTeamDialog = ({ selectedRestaurantAuth, selectedRestaurant, m
                                     )}
                                 </form>
 
-                                {members.map((member) => (
+                                {members.data?.map((member) => (
                                     <div key={member._id} className="flex items-center gap-2">
                                         <div>{member.user}</div>
                                         <div>{member.role}</div>
                                         <div>{member.accepted ? 'Accepted' : 'Pending'}</div>
                                     </div>
                                 ))}
-                            </div>
-                        </>
+                            </div></>
                     )}
                 </div>
+                {/* <DialogFooter>
+                    <Button type="submit">Create</Button>
+                </DialogFooter> */}
             </DialogContent>
         </Dialog>
-    );
-};
+
+    )
+}

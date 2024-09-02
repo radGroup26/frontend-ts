@@ -2,7 +2,6 @@ import {
     LayoutDashboard,
     LifeBuoy,
     LogOut,
-    Plus,
     SquareUser,
     Store
 } from "lucide-react";
@@ -10,20 +9,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/lib/api/api";
+import fetchRestaurants from "@/lib/api/fetchRestaurants";
 import { cn } from "@/lib/utils";
 import { Member } from "@/types/member";
-import type { Restaurant } from "@/types/retaurant";
-import { useFormik } from "formik";
-import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import CreateRestaurantDialog from "./CreateRestaurantDialog";
 import Logo from "./Logo";
+import ManageTeamDialog from "./ManageTeamDialog";
 import Nav from "./Nav";
 import Switcher from "./Switcher";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
-import { useQuery } from "@tanstack/react-query";
-import fetchRestaurants from "@/lib/api/fetchRestaurants";
 
 
 const navItems1 = [
@@ -38,10 +34,7 @@ const navItems2 = [
 ];
 
 export default function Layout({ children }: { children: JSX.Element }) {
-    // const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-    const [members, setMembers] = useState<Member[]>([]);
-    // const [selectedRestaurant, setSelectedRestaurant] = useState<string | undefined>(undefined)
-    const { logout, selectedRestaurant, setSelectedRestaurant } = useAuth();
+    const { logout } = useAuth();
 
 
     const restaurants = useQuery({
@@ -93,23 +86,6 @@ export default function Layout({ children }: { children: JSX.Element }) {
 
     // const [openCreateTeam, setOpenCreateTeam] = useState(false);
 
-
-    // const updateTeamName = useFormik({
-    //     initialValues: {
-    //         newName: selectedRestaurantAuth?.name,
-    //         teamId: selectedRestaurant
-    //     },
-    //     enableReinitialize: true,
-    //     onSubmit: (values) => {
-    //         api.put(`/teams/name`, values, { withCredentials: true })
-    //             .then((response) => {
-    //                 console.log(response);
-    //             })
-    //             .catch((error) => {
-    //                 console.log(error);
-    //             })
-    //     }
-    // })
 
     // const options = useMemo(() => {
     //     return restaurants.data.map(restaurant => ({
@@ -216,6 +192,8 @@ export default function Layout({ children }: { children: JSX.Element }) {
                     <Switcher isCollapsed={false} />
                 </div>
 
+                <CreateRestaurantDialog />
+                <ManageTeamDialog />
             </header>
 
             <main className="px-4 pt-2">
