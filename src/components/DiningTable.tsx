@@ -31,10 +31,11 @@ import axios from "axios";
 
 interface DiningTableProps {
     tableId: string;
+    tableNo: string;
     tableSeats: string;
 }
 
-export default function DiningTable({ tableId, tableSeats }: DiningTableProps) {
+export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTableProps) {
     const [orders, setOrders] = useState([]);
     const [orderTypes, setOrderTypes] = useState([]);
     const [newOrder, setNewOrder] = useState({ order: "", status: "" });
@@ -89,9 +90,9 @@ export default function DiningTable({ tableId, tableSeats }: DiningTableProps) {
     const allowedRoles = ["admin", "chef", "waiter"];
 
     return (
-        <Card className={'flex flex-col max-w-96 min-h-96'}>
+        <Card className={'flex flex-col max-w-96 min-h-96 m-3'}>
             <CardHeader>
-                <CardTitle>Table {tableId}</CardTitle>
+                <CardTitle>Table {tableNo}</CardTitle>
                 <CardDescription>{tableSeats} seats</CardDescription>
             </CardHeader>
             <CardContent className={'flex-grow'}>
@@ -107,9 +108,9 @@ export default function DiningTable({ tableId, tableSeats }: DiningTableProps) {
                     </TableBody>
                 </Table>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="relative">
                 <Popover>
-                    <PopoverTrigger>Add New Order</PopoverTrigger>
+                    <PopoverTrigger className="absolute right-10 mb-5">Add New Order</PopoverTrigger>
                     <PopoverContent>
                         <form onSubmit={handleAddOrder} className={"flex flex-col"}>
                             <Select onValueChange={(value) => setNewOrder({...newOrder, order: value})}>
