@@ -36,6 +36,8 @@ interface DiningTableProps {
 
 export default function DiningTable({ tableId, tableSeats }: DiningTableProps) {
     const [orders, setOrders] = useState([]);
+    const [orderTypes, setOrderTypes] = useState([]);
+    const [newOrder, setNewOrder] = useState({ order: "", status: "" });
 
     useEffect(() => {
         // // Fetch orders from the backend
@@ -46,6 +48,22 @@ export default function DiningTable({ tableId, tableSeats }: DiningTableProps) {
         //     .catch(error => {
         //         console.error("Error fetching orders:", error);
         //     });
+        // // Fetch available order types from the backend
+        // axios.get("http://localhost:3000/order-types")
+        //     .then(response => {
+        //         setOrderTypes(response.data);
+        //     })
+        //     .catch(error => {
+        //         console.error("Error fetching order types:", error);
+        //     });
+
+        // Sample order types array
+        const sampleOrderTypes = [
+            { id: "1", name: "Teriyaki Pizza Large" },
+            { id: "2", name: "Spicy Chicken Pizza Regular" },
+            { id: "3", name: "Classic Pizza Extra Cheese Small" },
+        ];
+        setOrderTypes(sampleOrderTypes);
 
         // Sample orders array
         const sampleOrders = [
@@ -55,6 +73,18 @@ export default function DiningTable({ tableId, tableSeats }: DiningTableProps) {
         ];
         setOrders(sampleOrders);
     }, []);
+
+    const handleAddOrder = (e) => {
+        e.preventDefault();
+        axios.post("http://localhost:3000/orders", newOrder)
+            .then(response => {
+                setOrders([...orders, response.data]);
+                setNewOrder({ order: "", status: "Pending" });
+            })
+            .catch(error => {
+                console.error("Error adding order:", error);
+            });
+    };
 
     return (
         <Card className={'flex flex-col max-w-96 min-h-96'}>
@@ -79,17 +109,19 @@ export default function DiningTable({ tableId, tableSeats }: DiningTableProps) {
                 <Popover>
                     <PopoverTrigger>Add New Order</PopoverTrigger>
                     <PopoverContent>
-                        <Select>
-                            <SelectTrigger className="w-[180px]">
-                                <SelectValue placeholder="Theme" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="light">Light</SelectItem>
-                                <SelectItem value="dark">Dark</SelectItem>
-                                <SelectItem value="system">System</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <Button>Add Order</Button>
+                        <form onSubmit={handleAddOrder} className={"flex flex-col"}>
+                            <Select onValueChange={(value) => setNewOrder({...newOrder, order: value})}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select Order Type"/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {orderTypes.map((type) => (
+                                        <SelectItem key={type.id} value={type.name}>{type.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <Button type="submit" className={'mt-4'}>Add Order</Button>
+                        </form>
                     </PopoverContent>
                 </Popover>
             </CardFooter>
