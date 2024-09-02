@@ -1,7 +1,7 @@
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 import { SquareTerminal, Bot, Code2, Book, Settings2 } from 'lucide-react';
 import { Button } from './ui/button';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 type NavItem = {
@@ -33,14 +33,15 @@ export default function Nav({ navItems = defaultNavItems }: NavProps) {
                 {navItems.map((item, index) => (
                     <Tooltip key={index}>
                         <TooltipTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className={cn('rounded-lg', { 'bg-muted': activeRoute === item.route })}
-                                aria-label={item.ariaLabel}
-                            >
-                                <item.icon className="size-5" />
-                            </Button>
+                            <Link to={item.route}>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className={cn('rounded-lg', { 'bg-muted': activeRoute === item.route })}
+                                    aria-label={item.ariaLabel}
+                                >
+                                    <item.icon className="size-5" />
+                                </Button></Link>
                         </TooltipTrigger>
                         <TooltipContent side="right" sideOffset={5}>
                             {item.tooltip}

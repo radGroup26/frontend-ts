@@ -19,16 +19,21 @@ import Dashboard from './routes/dashboard';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import Invites from './routes/invites';
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Root />,
+    element: <ProtectedRoute element={<Root />} />,
     children: [
       {
         path: "dashboard",
         element: <ProtectedRoute element={<Dashboard />} />,
 
+      },
+      {
+        path: "invites",
+        element: <ProtectedRoute element={<Invites/>} />,
       }
     ]
   },
