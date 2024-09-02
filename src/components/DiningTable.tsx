@@ -86,6 +86,8 @@ export default function DiningTable({ tableId, tableSeats }: DiningTableProps) {
             });
     };
 
+    const allowedRoles = ["admin", "chef", "waiter"];
+
     return (
         <Card className={'flex flex-col max-w-96 min-h-96'}>
             <CardHeader>
