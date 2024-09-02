@@ -1,7 +1,9 @@
+import DiningTable from "@/components/DiningTable";
+
 export default function Dashboard() {
     return (
         <div>
-            <h1>Dashboard</h1>
+            <DiningTable tableId={"1"} tableSeats={"4"}/>
         </div>
     );
 }
