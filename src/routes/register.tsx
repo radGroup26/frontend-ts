@@ -56,7 +56,7 @@ export default function Register() {
                     <form onSubmit={form.handleSubmit}>
                         <div className="space-y-3">
                             {/* <Input placeholder="Name" /> */}
-                            <Input name="username" placeholder="Email" type="email" onChange={form.handleChange} value={form.values.username} />
+                            <Input name="username" placeholder="Email" onChange={form.handleChange} value={form.values.username} />
                             <Input name="password" type="password" placeholder="Password" onChange={form.handleChange} value={form.values.password} />
                         </div>
 

@@ -3,7 +3,7 @@ import {
     LifeBuoy,
     LogOut,
     SquareUser,
-    Store
+    UserCog
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/t
 
 const navItems1 = [
     { icon: LayoutDashboard, ariaLabel: "Dashboard", tooltip: "Dashboard", route: "/dashboard" },
-    { icon: Store, ariaLabel: "Restaurants", tooltip: "Restaurants", route: "/restaurants" },
+    { icon: UserCog, ariaLabel: "Invites", tooltip: "Invites", route: "/invites" },
 
 ];
 

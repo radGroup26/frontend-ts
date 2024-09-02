@@ -1,14 +1,15 @@
 import { useAuth } from "@/context/AuthContext";
+import api from "@/lib/api/api";
+import fetchMembers from "@/lib/api/fetchMembers";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useFormik } from "formik";
+import { useState } from "react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { useFormik } from "formik";
-import api from "@/lib/api/api";
-import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import fetchMembers from "@/lib/api/fetchMembers";
-import fetchRestaurants from "@/lib/api/fetchRestaurants";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "./ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 
 export default function ManageTeamDialog() {
     const { selectedRestaurant } = useAuth();
@@ -42,15 +43,18 @@ export default function ManageTeamDialog() {
 
     const inviteMemberForm = useFormik({
         initialValues: {
-            teamId: selectedRestaurant,
+            teamId: selectedRestaurant?._id,
             username: '',
-            role: 'member'
+            role: ''
         },
         enableReinitialize: true,
         onSubmit: (values) => {
+            // console.log(values);
+
             api.post('/teams/invite', values, { withCredentials: true })
                 .then((response) => {
                     console.log(response);
+                    members.refetch();
                     setInviteError(null);
                 })
                 .catch((error) => {
@@ -92,7 +96,7 @@ export default function ManageTeamDialog() {
 
                                 <form onSubmit={updateTeamName.handleSubmit}>
                                     <div className="flex items-center gap-2">
-                                        <Label htmlFor="name" className="text-right">
+                                        <Label htmlFor="newName" className="text-right">
                                             Name
                                         </Label>
                                         <Input
@@ -101,6 +105,7 @@ export default function ManageTeamDialog() {
                                             name="newName"
                                             value={updateTeamName.values.newName}
                                             onChange={updateTeamName.handleChange}
+                                            placeholder="New Name"
                                         />
                                         <Button type="submit">Update</Button>
                                     </div>
@@ -112,34 +117,68 @@ export default function ManageTeamDialog() {
                                 <h2 className="mb-4 text-xs text-gray-700">Invite a member to the resataurant</h2>
 
                                 <form onSubmit={inviteMemberForm.handleSubmit}>
-                                    <div className="flex items-center gap-2">
-                                        <Label htmlFor="name" className="text-right">
+                                    <div className="flex flex-col gap-2">
+                                        {/* <Label htmlFor="name" className="text-right">
                                             Email
-                                        </Label>
-                                        <Input
-                                            id="username"
-                                            className="col-span-3"
-                                            name="username"
-                                            value={inviteMemberForm.values.username}
-                                            onChange={inviteMemberForm.handleChange}
-                                        />
+                                        </Label> */}
+                                        <div className="flex gap-2">
+                                            <Input
+                                                id="username"
+                                                name="username"
+                                                value={inviteMemberForm.values.username}
+                                                onChange={inviteMemberForm.handleChange}
+                                                placeholder="Email"
+                                            />
+                                            <Select
+                                                value={inviteMemberForm.values.role}
+                                                onValueChange={(value) => inviteMemberForm.setFieldValue('role', value)}
+                                            >
+                                                <SelectTrigger className="w-[180px]">
+                                                    <SelectValue placeholder="Select a Role" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectGroup>
+                                                        <SelectLabel>Roles</SelectLabel>
+                                                        <SelectItem value="waiter">Waiter</SelectItem>
+                                                        <SelectItem value="chef">Chef</SelectItem>
+                                                    </SelectGroup>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
                                         <Button type="submit">Invite</Button>
                                     </div>
+
                                     {inviteError && (
                                         <div className="text-xs text-red-700 mt-2">
                                             {inviteError}
                                         </div>
                                     )}
                                 </form>
+                            </div>
+                            <div className="mt-8">
+                                <h1 className="text-gray-800">Members</h1>
+                                <h2 className="mb-4 text-xs text-gray-700">Members in your restaurant</h2>
 
-                                {members.data?.map((member) => (
-                                    <div key={member._id} className="flex items-center gap-2">
-                                        <div>{member.user}</div>
-                                        <div>{member.role}</div>
-                                        <div>{member.accepted ? 'Accepted' : 'Pending'}</div>
-                                    </div>
-                                ))}
-                            </div></>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead className="w-[100px]">ID</TableHead>
+                                            <TableHead>Role</TableHead>
+                                            <TableHead>Invite</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {members.data?.map((member) => (
+                                            <TableRow key={member._id}>
+                                                <TableCell className="font-medium">{member.user}</TableCell>
+                                                <TableCell>{member.role}</TableCell>
+                                                <TableCell>{member.accepted ? 'Accepted' : 'Pending'}</TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </>
                     )}
                 </div>
                 {/* <DialogFooter>

@@ -1,7 +1,5 @@
 import { Member } from "@/types/member";
 import api from "./api";
-import { Restaurant } from "@/types/retaurant";
-import { QueryFunctionContext } from "@tanstack/react-query";
 
 export default async function fetchMembers({ queryKey }: any) {
     const teamId = queryKey[1]._id;
