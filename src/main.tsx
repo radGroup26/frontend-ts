@@ -23,7 +23,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Root />,
+    element: <ProtectedRoute element={<Root />} />,
     children: [
       {
         path: "dashboard",

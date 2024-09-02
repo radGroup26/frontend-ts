@@ -5,8 +5,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { useAuth } from "@/context/AuthContext";
+import fetchRestaurants from "@/lib/api/fetchRestaurants";
 import { cn } from "@/lib/utils";
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { Restaurant } from "@/types/retaurant";
+import { useQuery } from "@tanstack/react-query";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 
 interface Option {
@@ -15,25 +19,46 @@ interface Option {
 }
 
 interface Props {
-    isCollapsed: boolean,
-    options: Option[] | undefined,
-    selected: string | undefined,
-    setSelected: Dispatch<SetStateAction<string | undefined>>
+    isCollapsed: boolean
 }
 
 export default function Switcher({
     isCollapsed,
-    options,
-    selected,
-    setSelected
 }: Props) {
+    const [selected, setSelected] = useState<string | undefined>(undefined);
+    const { setSelectedRestaurant } = useAuth();
+
+
+    const restaurants = useQuery({
+        queryKey: ['restaurants'],
+        queryFn: fetchRestaurants
+    })
+
+    if (restaurants.isLoading) {
+        return <div>Loading...</div>
+    }
+
+    // option for the select from the data from restaurants.data
+    const options = restaurants.data?.map((restaurant: any) => ({
+        name: restaurant.name,
+        value: restaurant._id,
+    }));
+
+    // use selected to set selectedRestaurant using data from restautat.data
     useEffect(() => {
-        // console.log('selectedz', selected);
+        // dont run on first render with if
+        if (selected) {
+            // find the restaurant with the selected id
+            const restaurant = restaurants.data?.find((restaurant: Restaurant) => restaurant._id === selected);
+            setSelectedRestaurant(restaurant);
+        }
     }, [selected]);
 
-    // useEffect(() => {
-    //     console.log('options', options);
-    // }, [options])
+    useEffect(() => {
+        if (restaurants.data && restaurants.data.length > 0) {
+            setSelected(restaurants.data[0]._id);
+        }
+    }, [restaurants.data]);
 
     return (
         <Select value={selected} onValueChange={setSelected}>

@@ -7,7 +7,7 @@ import { UserGroupIcon } from "@heroicons/react/24/solid";
 import axios from "axios";
 import { useFormik } from "formik";
 import { Link, useNavigate } from "react-router-dom";
-import api from "@/lib/api";
+import api from "@/lib/api/api";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Login() {
@@ -55,7 +55,7 @@ export default function Login() {
                     <div className="space-y-3">
                         {/* <Input placeholder="Name" /> */}
                         <Input value={form.values.username} onChange={form.handleChange} name="username" placeholder="Email" autoComplete="current-password" />
-                        <Input value={form.values.password} onChange={form.handleChange} name="password" type="password" placeholder="Password" autoComplete="current-password"  />
+                        <Input value={form.values.password} onChange={form.handleChange} name="password" type="password" placeholder="Password" autoComplete="current-password" />
                     </div>
 
                     <div className="mt-10 flex flex-col">

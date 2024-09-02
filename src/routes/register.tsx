@@ -8,7 +8,7 @@ import { useFormik } from 'formik';
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
-import api from "@/lib/api";
+import api from "@/lib/api/api";
 
 export default function Register() {
     const { toast } = useToast();
