@@ -20,6 +20,7 @@ import Dashboard from './routes/dashboard';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import Invites from './routes/invites';
+import Menu from "@/routes/menu.tsx";
 
 const router = createBrowserRouter([
   {
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
       {
         path: "invites",
         element: <ProtectedRoute element={<Invites/>} />,
+      },
+      {
+        path: "menu",
+        element: <ProtectedRoute element={<Menu/>} />,
       }
     ]
   },

@@ -20,11 +20,11 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
     const { selectedRestaurant } = useAuth();
     const [orders, setOrders] = useState<Order[]>([]);
     const [items, setItems] = useState<Item[]>([]);
-    const [orderFinished, setOrderFinished] = useState(false);
-    const [orderDeclined, setOrderDeclined] = useState(false);
+    const [orderChanged, setOrderChanged] = useState(false);
     const [newOrder, setNewOrder] = useState({ restaurantId: selectedRestaurant?._id,
         tableId:tableId, name: "", quantity: 1, status: "Pending" });
     const [deleteOrder, setDeleteOrder] = useState({ orderId: "" });
+    const [cancelOrder, setCancelOrder] = useState({ orderId: "" });
     const token = localStorage.getItem('accessToken');
     const quantity = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -52,7 +52,7 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
             .catch(error => {
                 console.error("Error fetching order types:", error);
             });
-    }, [newOrder, deleteOrder, orderFinished, orderDeclined]);
+    }, [newOrder, deleteOrder, cancelOrder, orderChanged]);
 
     // handle Waiter's Add order Submit
     const handleAddOrder = (e) => {
@@ -68,7 +68,7 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
             });
     };
 
-    // handle Chef's Delete order Submit
+    // handle Waiter's Delete order Submit
     const handleDeleteOrder = (e) => {
         e.preventDefault();
         api.post("/orders/delete", deleteOrder)
@@ -81,13 +81,26 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
             });
     };
 
+    // handle Chef's Cancel order Submit
+    const handleCancelOrder = (e) => {
+        e.preventDefault();
+        api.post("/orders/cancel", cancelOrder)
+            .then(response => {
+                setOrders([...orders, response.data]);
+                setCancelOrder({ orderId: "" });
+            })
+            .catch(error => {
+                console.error("Error Cancel order:", error);
+            });
+    };
+
     // handle Waiter's Finish order Submit
     const handleOrderFinish = (orderId: string) => {
         api.post('/orders/finish', { orderId })
             .then(response => {
                 // Handle successful response
                 console.log('Order finished:', response.data);
-                setOrderFinished(!orderFinished);
+                setOrderChanged(!orderChanged);
             })
             .catch(error => {
                 // Handle error
@@ -101,7 +114,7 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
             .then(response => {
                 // Handle successful response
                 console.log('Order Declined:', response.data);
-                setOrderFinished(!orderDeclined);
+                setOrderChanged(!orderChanged);
             })
             .catch(error => {
                 // Handle error
@@ -109,41 +122,112 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
             });
     }
 
+    // handle Chef's Start order Submit
+    const handleOrderStart = (orderId: string) => {
+        api.post('/orders/start', { orderId })
+            .then(response => {
+                // Handle successful response
+                console.log('Order Started:', response.data);
+                setOrderChanged(!orderChanged);
+            })
+            .catch(error => {
+                // Handle error
+                console.error('Error starting order:', error);
+            });
+    }
+
+    // handle Chef's Complete order Submit
+    const handleOrderComplete = (orderId: string) => {
+        api.post('/orders/complete', { orderId })
+            .then(response => {
+                // Handle successful response
+                console.log('Order Complete:', response.data);
+                setOrderChanged(!orderChanged);
+            })
+            .catch(error => {
+                // Handle error
+                console.error('Error completing order:', error);
+            });
+    }
+
     // Display orders
     let orderContent;
-    if (orders.length > 0) {
-        orderContent = (
-        <Table>
-            <TableCaption>Orders</TableCaption>
-            <TableBody>
-                {orders.map((order) => (
-                    <TableRow key={order._id}>
-                        <TableCell>{order.name}</TableCell>
-                        <TableCell>{`${order.quantity}`}</TableCell>
-                        <TableCell align={"center"}>
-                            {order.status === 'Completed' ? (
-                                <Button onClick={() => handleOrderFinish(order._id)}>Finish Order</Button>
-                            ) : order.status === 'Cancelled' ? (
-                                <Button onClick={() => handleOrderDecline(order._id)}>Confirm Cancel</Button>
-                            ) : (
-                                order.status
-                            )}
-                        </TableCell>
-                    </TableRow>
-                ))}
-            </TableBody>
-        </Table>
-        )
-    } else {
+    if (orders.length === 0) {
         orderContent = (
             <div>No Orders</div>
         )
+    } else {
+        // Waiters Perspective
+        // orderContent = (
+        //     <Table>
+        //         <TableCaption>Orders</TableCaption>
+        //         <TableBody>
+        //             {orders.map((order) => (
+        //                 <TableRow key={order._id}>
+        //                     <TableCell>{order.name}</TableCell>
+        //                     <TableCell>{`${order.quantity}`}</TableCell>
+        //                     <TableCell align={"center"}>
+        //                         {order.status === 'Completed' ? (
+        //                             <Button className={'w-full'} onClick={() => handleOrderFinish(order._id)}>Finish Order</Button>
+        //                         ) : order.status === 'Cancelled' ? (
+        //                             <Button className={'w-full'} onClick={() => handleOrderDecline(order._id)}>Confirm Cancel</Button>
+        //                         ) : (
+        //                             order.status
+        //                         )}
+        //                     </TableCell>
+        //                 </TableRow>
+        //             ))}
+        //         </TableBody>
+        //     </Table>
+        // )
+
+        // Chef's Perspective
+        orderContent = (
+            <Table>
+                <TableCaption>Orders</TableCaption>
+                <TableBody>
+                    {orders.map((order) => (
+                        <TableRow key={order._id}>
+                            <TableCell>{order.name}</TableCell>
+                            <TableCell>{`${order.quantity}`}</TableCell>
+                            <TableCell align={"center"}>
+                                {order.status === 'Pending' ? (
+                                    <Button className={'w-full'} onClick={() => handleOrderStart(order._id)}>Start</Button>
+                                ) : order.status === 'InProgress' ? (
+                                    <Button className={'w-full'} onClick={() => handleOrderComplete(order._id)}>Complete</Button>
+                                ) : (
+                                    order.status
+                                )}
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        )
+
+        // Admin Perspective
+        // orderContent = (
+        //     <Table>
+        //         <TableCaption>Orders</TableCaption>
+        //         <TableBody>
+        //             {orders.map((order) => (
+        //                 <TableRow key={order._id}>
+        //                     <TableCell>{order.name}</TableCell>
+        //                     <TableCell>{`${order.quantity}`}</TableCell>
+        //                     <TableCell align={"center"}>{order.status}</TableCell>
+        //                 </TableRow>
+        //             ))}
+        //         </TableBody>
+        //     </Table>
+        // )
     }
 
     // Waiters Footer Content
     let addOrderContent =(
         <Popover>
-            <PopoverTrigger className="absolute right-10 mb-5">Add New Order</PopoverTrigger>
+            <PopoverTrigger className="" asChild>
+                <Button>Add New Order</Button>
+            </PopoverTrigger>
             <PopoverContent>
                 <form onSubmit={handleAddOrder} className={"flex flex-col"}>
                     <div className={"m-1"}>
@@ -181,10 +265,12 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
         </Popover>
     )
 
-    // Chef Footer Content
+    // Only Pending Data can be deleted
     let deleteOrderContent =(
         <Popover>
-            <PopoverTrigger className="absolute right-10 mb-5">Delete Order</PopoverTrigger>
+            <PopoverTrigger className="" asChild>
+                <Button variant="outline">Delete Order</Button>
+            </PopoverTrigger>
             <PopoverContent>
                 <form onSubmit={handleDeleteOrder} className={"flex flex-col"}>
                     <div className={"m-1"}>
@@ -193,7 +279,7 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
                                 <SelectValue placeholder="Select Order"/>
                             </SelectTrigger>
                             <SelectContent>
-                                {orders.map((order) => (
+                                {orders.filter(order => order.status === 'Pending').map((order) => (
                                     <SelectItem key={order._id} value={order._id}>
                                         {order.name + " x" + order.quantity}
                                     </SelectItem>
@@ -202,6 +288,43 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
                         </Select>
                     </div>
                     <Button type="submit" className={'my-3 mx-1'}>Delete Order</Button>
+                </form>
+            </PopoverContent>
+        </Popover>
+    )
+
+    // Chef's Footer Content
+    let cancelOrderContent =(
+        <Popover>
+            <PopoverTrigger className="" asChild>
+                <Button>Cancel Order</Button>
+            </PopoverTrigger>
+            <PopoverContent>
+                <form onSubmit={handleCancelOrder} className={"flex flex-col"}>
+                    <div className={"m-1"}>
+                        <Select onValueChange={(value) => setCancelOrder({...cancelOrder, orderId: value})}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select Order"/>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {/*{orders.filter(order => order.status === 'Pending' || order.status === 'InProgress').length === 0 ? (*/}
+                                {/*    <SelectItem disabled>No Orders Available</SelectItem>*/}
+                                {/*) : (*/}
+                                {/*    orders.filter(order => order.status === 'Pending' || order.status === 'InProgress').map((order) => (*/}
+                                {/*        <SelectItem key={order._id} value={order._id}>*/}
+                                {/*            {order.name + " x" + order.quantity}*/}
+                                {/*        </SelectItem>*/}
+                                {/*    ))*/}
+                                {/*)}*/}
+                                {orders.filter(order => order.status === 'Pending' || order.status === 'InProgress').map((order) => (
+                                    <SelectItem key={order._id} value={order._id}>
+                                        {order.name + " x" + order.quantity}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <Button type="submit" className={'my-3 mx-1'}>Cancel Order</Button>
                 </form>
             </PopoverContent>
         </Popover>
@@ -217,9 +340,10 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
             <CardContent className={'flex-grow'}>
                 {orderContent}
             </CardContent>
-            <CardFooter className="relative">
+            <CardFooter className="flex justify-end mb-1 gap-3">
+                {deleteOrderContent}
+                {/*{cancelOrderContent}*/}
                 {addOrderContent}
-                {/*{deleteOrderContent}*/}
             </CardFooter>
         </Card>
     )
