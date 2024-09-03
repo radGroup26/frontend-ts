@@ -1,0 +1,26 @@
+[
+  {
+    "restaurantId": { "$oid": "66d5c1e04d0eafbe43f634d5" },
+    "tableId": { "$oid": "66d5fb0f37fc8562d9670eec" },
+    "name": "Biancaneve ( Cheese lovers) Large",
+    "quantity" : 1,
+    "status": "Pending",
+    "createdAt": "2021-08-01T12:00:00.000Z"
+  },
+  {
+    "restaurantId": { "$oid": "66d5c1e04d0eafbe43f634d5" },
+    "tableId": { "$oid": "66d5fb0f37fc8562d9670eec" },
+    "name": "Margarita Medium",
+    "quantity" : 1,
+    "status": "Pending",
+    "createdAt": "2021-08-01T12:00:00.000Z"
+  },
+  {
+    "restaurantId": { "$oid": "66d5c1e04d0eafbe43f634d5" },
+    "tableId": { "$oid": "66d5fb0f37fc8562d9670eec" },
+    "name": "Garlic and Mozzarella Medium",
+    "quantity" : 2,
+    "status": "Pending",
+    "createdAt": "2021-08-01T12:00:00.000Z"
+  }
+]
