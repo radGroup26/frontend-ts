@@ -65,14 +65,6 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
                 console.error("Error fetching order types:", error);
             });
 
-        // // Sample order types array
-        // const sampleOrderTypes = [
-        //     { id: "1", name: "Teriyaki Pizza Large" },
-        //     { id: "2", name: "Spicy Chicken Pizza Regular" },
-        //     { id: "3", name: "Classic Pizza Extra Cheese Small" },
-        // ];
-        // setOrderTypes(sampleOrderTypes);
-
         // Sample orders array
         const sampleOrders = [
             { id: "1", order: "Teriyaki Pizza Large", status: "Completed" },
