@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/select"
 import {Button} from "@/components/ui/button"
 import axios from "axios";
+import {useAuth} from "@/context/AuthContext.tsx";
 
 interface DiningTableProps {
     tableId: string;
@@ -39,6 +40,8 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
     const [orders, setOrders] = useState([]);
     const [orderTypes, setOrderTypes] = useState([]);
     const [newOrder, setNewOrder] = useState({ order: "", status: "" });
+    const { selectedRestaurant } = useAuth();
+    const token = localStorage.getItem('accessToken');
 
     useEffect(() => {
         // // Fetch orders from the backend
@@ -49,22 +52,26 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
         //     .catch(error => {
         //         console.error("Error fetching orders:", error);
         //     });
-        // // Fetch available order types from the backend
-        // axios.get("http://localhost:3000/order-types")
-        //     .then(response => {
-        //         setOrderTypes(response.data);
-        //     })
-        //     .catch(error => {
-        //         console.error("Error fetching order types:", error);
-        //     });
 
-        // Sample order types array
-        const sampleOrderTypes = [
-            { id: "1", name: "Teriyaki Pizza Large" },
-            { id: "2", name: "Spicy Chicken Pizza Regular" },
-            { id: "3", name: "Classic Pizza Extra Cheese Small" },
-        ];
-        setOrderTypes(sampleOrderTypes);
+        // Fetch available order types from the backend
+        axios.get(`http://localhost:3000/menus/${selectedRestaurant._id}`, {
+                headers: {
+                'Authorization': `Bearer ${token}`}
+            })
+            .then(response => {
+                setOrderTypes(response.data);
+            })
+            .catch(error => {
+                console.error("Error fetching order types:", error);
+            });
+
+        // // Sample order types array
+        // const sampleOrderTypes = [
+        //     { id: "1", name: "Teriyaki Pizza Large" },
+        //     { id: "2", name: "Spicy Chicken Pizza Regular" },
+        //     { id: "3", name: "Classic Pizza Extra Cheese Small" },
+        // ];
+        // setOrderTypes(sampleOrderTypes);
 
         // Sample orders array
         const sampleOrders = [
@@ -88,6 +95,7 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
     };
 
     const allowedRoles = ["admin", "chef", "waiter"];
+    // console.log(orderTypes[0].items)
 
     return (
         <Card className={'flex flex-col max-w-96 min-h-96 m-3'}>
@@ -119,7 +127,9 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
                                 </SelectTrigger>
                                 <SelectContent>
                                     {orderTypes.map((type) => (
-                                        <SelectItem key={type.id} value={type.name}>{type.name}</SelectItem>
+                                        <SelectItem key={type._id} value={type.name + ' ' + type.option}>
+                                            {type.name + ' ' + type.option}
+                                        </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
