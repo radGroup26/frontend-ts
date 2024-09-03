@@ -1,17 +1,18 @@
 // components.tsx
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { useCreateTeamForm } from "@/hooks/layoutHooks";
-import type { Restaurant } from "@/types/retaurant";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import type { Dispatch, SetStateAction } from 'react';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { useCreateTeamForm } from '@/hooks/layoutHooks';
+import type { Restaurant } from '@/types/retaurant';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
 
 export default function CreateTeamDialog({ setRestaurants, openCreateTeam, setOpenCreateTeam }:
     {
-        setRestaurants: React.Dispatch<React.SetStateAction<Restaurant[]>>,
+        setRestaurants: Dispatch<SetStateAction<Restaurant[]>>,
         openCreateTeam: boolean,
-        setOpenCreateTeam: React.Dispatch<React.SetStateAction<boolean>>
+        setOpenCreateTeam: Dispatch<SetStateAction<boolean>>
     }) {
     const createTeamForm = useCreateTeamForm(setRestaurants, setOpenCreateTeam);
 
