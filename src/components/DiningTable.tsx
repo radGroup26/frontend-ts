@@ -6,6 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {Button} from "@/components/ui/button"
 import axios from "axios";
 import {useAuth} from "@/context/AuthContext.tsx";
+import {Order} from "@/types/order.tsx";
+import {Item} from "@/types/Item.tsx";
 
 interface DiningTableProps {
     tableId: string;
@@ -15,11 +17,11 @@ interface DiningTableProps {
 
 export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTableProps) {
     const { selectedRestaurant } = useAuth();
-    const [orders, setOrders] = useState([]);
-    const [orderTypes, setOrderTypes] = useState([]);
+    const [orders, setOrders] = useState<Order[]>([]);
+    const [items, setItems] = useState<Item[]>([]);
     const [newOrder, setNewOrder] = useState({ restaurantId: selectedRestaurant._id,
-        tableId:tableId, name: "", quantity: 0, status: "Pending" });
-    const [deleteOrder, setDeleteOrder] = useState("");
+        tableId:tableId, name: "", quantity: 1, status: "Pending" });
+    const [deleteOrder, setDeleteOrder] = useState({ orderId: "" });
     const token = localStorage.getItem('accessToken');
     const quantity = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -48,12 +50,12 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
                 'Authorization': `Bearer ${token}`}
             })
             .then(response => {
-                setOrderTypes(response.data);
+                setItems(response.data);
             })
             .catch(error => {
                 console.error("Error fetching order types:", error);
             });
-    }, [newOrder]);
+    }, [newOrder, deleteOrder]);
 
     // handle Waiter's Add order Submit
     const handleAddOrder = (e) => {
@@ -65,7 +67,7 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
             .then(response => {
                 setOrders([...orders, response.data]);
                 setNewOrder({ restaurantId: selectedRestaurant._id,
-                    tableId:tableId, name: "", quantity:0, status: "Pending" });
+                    tableId:tableId, name: "", quantity:1, status: "Pending" });
             })
             .catch(error => {
                 console.error("Error adding order:", error);
@@ -75,19 +77,34 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
     // handle Chef's Delete order Submit
     const handleDeleteOrder = (e) => {
         e.preventDefault();
-        // axios.post("http://localhost:3000/orders/create", newOrder, {
-        //     headers: {
-        //         'Authorization': `Bearer ${token}`}
+        axios.post("http://localhost:3000/orders/delete", deleteOrder, {
+            headers: {
+                'Authorization': `Bearer ${token}`}
+        })
+            .then(response => {
+                setOrders([...orders, response.data]);
+                setDeleteOrder({ orderId: "" });
+            })
+            .catch(error => {
+                console.error("Error Delete order:", error);
+            });
+    };
+
+    // handle Waiter's Finish order Submit
+    const handleOrderFinish = (e) => {
+        e.preventDefault();
+        // axios.post('http://localhost:3000/orders/finish', { orderId: order._id }, {
+        //     headers: { 'Authorization': `Bearer ${token}` }
         // })
         //     .then(response => {
-        //         setOrders([...orders, response.data]);
-        //         setNewOrder({ restaurantId: selectedRestaurant._id,
-        //             tableId:tableId, name: "", quantity:0, status: "Pending" });
+        //         // Handle successful response
+        //         console.log('Order finished:', response.data);
         //     })
         //     .catch(error => {
-        //         console.error("Error adding order:", error);
+        //         // Handle error
+        //         console.error('Error finishing order:', error);
         //     });
-    };
+    }
 
     // Display orders
     let orderContent;
@@ -100,7 +117,13 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
                     <TableRow key={order._id}>
                         <TableCell>{order.name}</TableCell>
                         <TableCell>{order.quantity}</TableCell>
-                        <TableCell>{order.status}</TableCell>
+                        <TableCell>
+                            {order.status === 'Completed' ? (
+                                <Button onClick={handleOrderFinish}>Finish Order</Button>
+                            ) : (
+                                order.status
+                            )}
+                        </TableCell>
                     </TableRow>
                 ))}
             </TableBody>
@@ -124,7 +147,7 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
                                 <SelectValue placeholder="Select Order Type"/>
                             </SelectTrigger>
                             <SelectContent>
-                                {orderTypes.map((type) => (
+                                {items.map((type) => (
                                     <SelectItem key={type._id} value={type.name + ' ' + type.option}>
                                         {type.name + ' ' + type.option}
                                     </SelectItem>
@@ -154,30 +177,30 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
     )
 
     // Chef Footer Content
-    // let deleteOrderContent =(
-    //     <Popover>
-    //         <PopoverTrigger className="absolute right-10 mb-5">Delete Order</PopoverTrigger>
-    //         <PopoverContent>
-    //             <form onSubmit={handleDeleteOrder} className={"flex flex-col"}>
-    //                 <div className={"m-1"}>
-    //                     <Select onValueChange={(value) => setNewOrder({...newOrder, name: value})}>
-    //                         <SelectTrigger>
-    //                             <SelectValue placeholder="Select Order"/>
-    //                         </SelectTrigger>
-    //                         <SelectContent>
-    //                             {orders.map((order) => (
-    //                                 <SelectItem key={order._id} value={order._id}>
-    //                                     {order.name + " " + order.quantity}
-    //                                 </SelectItem>
-    //                             ))}
-    //                         </SelectContent>
-    //                     </Select>
-    //                 </div>
-    //                 <Button type="submit" className={'my-3 mx-1'}>Delete Order</Button>
-    //             </form>
-    //         </PopoverContent>
-    //     </Popover>
-    // )
+    let deleteOrderContent =(
+        <Popover>
+            <PopoverTrigger className="absolute right-10 mb-5">Delete Order</PopoverTrigger>
+            <PopoverContent>
+                <form onSubmit={handleDeleteOrder} className={"flex flex-col"}>
+                    <div className={"m-1"}>
+                        <Select onValueChange={(value) => setDeleteOrder({...deleteOrder, orderId: value})}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select Order"/>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {orders.map((order) => (
+                                    <SelectItem key={order._id} value={order._id}>
+                                        {order.name + " x" + order.quantity}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <Button type="submit" className={'my-3 mx-1'}>Delete Order</Button>
+                </form>
+            </PopoverContent>
+        </Popover>
+    )
 
 
     return (
@@ -191,6 +214,7 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
             </CardContent>
             <CardFooter className="relative">
                 {addOrderContent}
+                {/*{deleteOrderContent}*/}
             </CardFooter>
         </Card>
     )

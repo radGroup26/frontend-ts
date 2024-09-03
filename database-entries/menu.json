@@ -1,7 +1,7 @@
 [
   {
     "restaurantId": { "$oid": "66d5c1e04d0eafbe43f634d5" },
-    "name": "Biancaneve ( Cheese lovers)",
+    "name": "Biancaneve ( Cheese lovers )",
     "description": "With pure olive oil and mozzarella",
     "option": "Medium",
     "price": 1050
