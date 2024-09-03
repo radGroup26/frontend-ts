@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode, Dispatch } from 'react';
 import axios from 'axios';
 import { Restaurant } from '@/types/retaurant';
+import fetchRole from '@/lib/api/fetchRole';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 interface AuthContextType {
     isAuthenticated: boolean;
@@ -8,6 +10,7 @@ interface AuthContextType {
     logout: () => void;
     selectedRestaurant: Restaurant | undefined;
     setSelectedRestaurant: Dispatch<Restaurant | undefined>;
+    role: string | undefined;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -16,6 +19,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [loading, setLoading] = useState(true);
     const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | undefined>(undefined);
+
+    const queryClient = useQueryClient();
+
+    const role = useQuery({
+        queryKey: ['role', selectedRestaurant?._id],
+        queryFn: fetchRole,
+        enabled: !!selectedRestaurant
+    });
 
     const login = () => setIsAuthenticated(true);
     const logout = () => {
@@ -51,6 +62,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         })();
     }, []);
 
+
+    useEffect(() => {
+        queryClient.invalidateQueries({
+            queryKey: ['role']
+        });
+    }, [selectedRestaurant, isAuthenticated]);
+
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -62,6 +80,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             logout,
             selectedRestaurant,
             setSelectedRestaurant,
+            role: role.data
         }}>
             {children}
         </AuthContext.Provider>
