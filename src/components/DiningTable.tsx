@@ -4,7 +4,6 @@ import { Table, TableBody, TableCaption, TableCell, TableRow } from "@/component
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {Button} from "@/components/ui/button"
-import axios from "axios";
 import {useAuth} from "@/context/AuthContext.tsx";
 import {Order} from "@/types/order.tsx";
 import {Item} from "@/types/Item.tsx";
@@ -27,7 +26,6 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
         tableId:tableId, name: "", quantity: 1, status: "Pending" });
     const [deleteOrder, setDeleteOrder] = useState({ orderId: "" });
     const [cancelOrder, setCancelOrder] = useState({ orderId: "" });
-    const token = localStorage.getItem('accessToken');
     const quantity = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     const { toast } = useToast();
 
@@ -73,7 +71,7 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
         api.post("/orders/create", newOrder)
             .then(response => {
                 setOrders([...orders, response.data]);
-                setNewOrder({ restaurantId: selectedRestaurant._id,
+                setNewOrder({ restaurantId: selectedRestaurant?._id,
                     tableId:tableId, name: "", quantity:1, status: "Pending" });
             })
             .catch(error => {
@@ -372,15 +370,6 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
                                 <SelectValue placeholder="Select Order"/>
                             </SelectTrigger>
                             <SelectContent>
-                                {/*{orders.filter(order => order.status === 'Pending' || order.status === 'InProgress').length === 0 ? (*/}
-                                {/*    <SelectItem disabled>No Orders Available</SelectItem>*/}
-                                {/*) : (*/}
-                                {/*    orders.filter(order => order.status === 'Pending' || order.status === 'InProgress').map((order) => (*/}
-                                {/*        <SelectItem key={order._id} value={order._id}>*/}
-                                {/*            {order.name + " x" + order.quantity}*/}
-                                {/*        </SelectItem>*/}
-                                {/*    ))*/}
-                                {/*)}*/}
                                 {orders.filter(order => order.status === 'Pending' || order.status === 'InProgress').map((order) => (
                                     <SelectItem key={order._id} value={order._id}>
                                         {order.name + " x" + order.quantity}
