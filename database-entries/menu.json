@@ -1,0 +1,44 @@
+[
+  {
+    "restaurantId": { "$oid": "66d5c1e04d0eafbe43f634d5" },
+    "name": "Biancaneve ( Cheese lovers )",
+    "description": "With pure olive oil and mozzarella",
+    "option": "Medium",
+    "price": 1050
+  },
+  {
+    "restaurantId": { "$oid": "66d5c1e04d0eafbe43f634d5" },
+    "name": "Biancaneve ( Cheese lovers)",
+    "description": "With pure olive oil and mozzarella",
+    "option": "Large",
+    "price": 1700
+  },
+  {
+    "restaurantId": { "$oid": "66d5c1e04d0eafbe43f634d5" },
+    "name": "Margarita",
+    "description": "With mozzarella and tomato sause",
+    "option": "Medium",
+    "price": 1050
+  },
+  {
+  "restaurantId": { "$oid": "66d5c1e04d0eafbe43f634d5" },
+  "name": "Margarita",
+  "description": "With mozzarella and tomato sause",
+  "option": "Large",
+  "price": 1700
+},
+  {
+    "restaurantId": { "$oid": "66d5c1e04d0eafbe43f634d5" },
+    "name": "Garlic and Mozzarella",
+    "description": "With garlic, olive oil and mozzarella",
+    "option": "Medium",
+    "price": 1050
+  },
+  {
+    "restaurantId": { "$oid": "66d5c1e04d0eafbe43f634d5" },
+    "name": "Garlic and Mozzarella",
+    "description": "With garlic, olive oil and mozzarella",
+    "option": "Large",
+    "price": 1700
+  }
+]

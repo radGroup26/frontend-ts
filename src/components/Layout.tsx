@@ -34,7 +34,7 @@ const navItems2 = [
 ];
 
 export default function Layout({ children }: { children: JSX.Element }) {
-    const { logout } = useAuth();
+    const { logout, role } = useAuth();
 
 
     const restaurants = useQuery({
@@ -194,6 +194,9 @@ export default function Layout({ children }: { children: JSX.Element }) {
 
                 <CreateRestaurantDialog />
                 <ManageTeamDialog />
+
+            <div>{role}</div>
+
             </header>
 
             <main className="px-4 pt-2">

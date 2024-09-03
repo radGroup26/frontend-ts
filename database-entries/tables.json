@@ -1,0 +1,26 @@
+[
+  {
+    "no": 1,
+    "restaurantId": { "$oid": "66d576506b5e282e52a5ad48" },
+    "seats": 4,
+    "isOccupied": false
+  },
+  {
+    "no": 1,
+    "restaurantId": { "$oid": "66d5768d6b5e282e52a5ad54" },
+    "seats": 2,
+    "isOccupied": true
+  },
+  {
+    "no": 1,
+    "restaurantId": { "$oid": "66d5c1e04d0eafbe43f634d5" },
+    "seats": 6,
+    "isOccupied": false
+  },
+  {
+    "no": 1,
+    "restaurantId": { "$oid": "66d5bfff2d7db5cb7209fdcc" },
+    "seats": 8,
+    "isOccupied": false
+  }
+]
