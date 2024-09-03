@@ -20,6 +20,8 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
     const { selectedRestaurant } = useAuth();
     const [orders, setOrders] = useState<Order[]>([]);
     const [items, setItems] = useState<Item[]>([]);
+    const [orderFinished, setOrderFinished] = useState(false);
+    const [orderDeclined, setOrderDeclined] = useState(false);
     const [newOrder, setNewOrder] = useState({ restaurantId: selectedRestaurant?._id,
         tableId:tableId, name: "", quantity: 1, status: "Pending" });
     const [deleteOrder, setDeleteOrder] = useState({ orderId: "" });
@@ -43,14 +45,14 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
             });
 
         // Fetch available order types from the backend
-        api.get(`/items/${selectedRestaurant._id}`)
+        api.get(`/items/${selectedRestaurant?._id}`)
             .then(response => {
                 setItems(response.data);
             })
             .catch(error => {
                 console.error("Error fetching order types:", error);
             });
-    }, [newOrder, deleteOrder]);
+    }, [newOrder, deleteOrder, orderFinished, orderDeclined]);
 
     // handle Waiter's Add order Submit
     const handleAddOrder = (e) => {
@@ -80,16 +82,30 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
     };
 
     // handle Waiter's Finish order Submit
-    const handleOrderFinish = (e) => {
-        e.preventDefault();
-        api.post('/orders/finish', { orderId: order._id })
+    const handleOrderFinish = (orderId: string) => {
+        api.post('/orders/finish', { orderId })
             .then(response => {
                 // Handle successful response
                 console.log('Order finished:', response.data);
+                setOrderFinished(!orderFinished);
             })
             .catch(error => {
                 // Handle error
                 console.error('Error finishing order:', error);
+            });
+    }
+
+    // handle Waiter's Decline order Submit
+    const handleOrderDecline = (orderId: string) => {
+        api.post('/orders/decline', { orderId })
+            .then(response => {
+                // Handle successful response
+                console.log('Order Declined:', response.data);
+                setOrderFinished(!orderDeclined);
+            })
+            .catch(error => {
+                // Handle error
+                console.error('Error declining order:', error);
             });
     }
 
@@ -106,7 +122,9 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
                         <TableCell>{`${order.quantity}`}</TableCell>
                         <TableCell align={"center"}>
                             {order.status === 'Completed' ? (
-                                <Button onClick={handleOrderFinish}>Finish Order</Button>
+                                <Button onClick={() => handleOrderFinish(order._id)}>Finish Order</Button>
+                            ) : order.status === 'Cancelled' ? (
+                                <Button onClick={() => handleOrderDecline(order._id)}>Confirm Cancel</Button>
                             ) : (
                                 order.status
                             )}
