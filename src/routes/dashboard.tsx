@@ -9,7 +9,7 @@ export default function Dashboard() {
 
     useEffect(() => {
         const getTables = async () => {
-            console.log(selectedRestaurant._id)
+            // console.log(selectedRestaurant._id)
 
             try {
                 const token = localStorage.getItem('accessToken');

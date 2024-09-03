@@ -80,7 +80,7 @@ export default function Menu() {
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button type="submit">Add Item</Button>
+                            <Button type="submit">Add Item:</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>

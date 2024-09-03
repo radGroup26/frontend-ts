@@ -9,6 +9,8 @@ import {useAuth} from "@/context/AuthContext.tsx";
 import {Order} from "@/types/order.tsx";
 import {Item} from "@/types/Item.tsx";
 import api from "@/lib/api/api.ts"
+import { useToast } from "@/hooks/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 
 interface DiningTableProps {
     tableId: string;
@@ -17,7 +19,7 @@ interface DiningTableProps {
 }
 
 export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTableProps) {
-    const { selectedRestaurant } = useAuth();
+    const { selectedRestaurant, role } = useAuth();
     const [orders, setOrders] = useState<Order[]>([]);
     const [items, setItems] = useState<Item[]>([]);
     const [orderChanged, setOrderChanged] = useState(false);
@@ -27,8 +29,9 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
     const [cancelOrder, setCancelOrder] = useState({ orderId: "" });
     const token = localStorage.getItem('accessToken');
     const quantity = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    const { toast } = useToast();
 
-    // const allowedRoles = ["admin", "chef", "waiter"];
+
     // console.log(orderTypes[0].items)
     // console.log(orders)
     // console.log(tableId)
@@ -57,6 +60,16 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
     // handle Waiter's Add order Submit
     const handleAddOrder = (e) => {
         e.preventDefault();
+
+        // Validate the new order
+        if (!newOrder.name || !newOrder.quantity || !newOrder.status) {
+            toast({
+                title: "Invalid Information",
+                description: "Please select valid entries in all fields before adding an order."
+            });
+            return;
+        }
+
         api.post("/orders/create", newOrder)
             .then(response => {
                 setOrders([...orders, response.data]);
@@ -71,6 +84,17 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
     // handle Waiter's Delete order Submit
     const handleDeleteOrder = (e) => {
         e.preventDefault();
+
+        console.log(deleteOrder);
+        // Validate the deleteOrder
+        if (!deleteOrder.orderId) {
+            toast({
+                title: "Invalid Information",
+                description: "Please select valid order to be deleted."
+            });
+            return;
+        }
+
         api.post("/orders/delete", deleteOrder)
             .then(response => {
                 setOrders([...orders, response.data]);
@@ -96,6 +120,16 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
 
     // handle Waiter's Finish order Submit
     const handleOrderFinish = (orderId: string) => {
+
+        // Validate the orderId
+        if (!orderId) {
+            toast({
+                title: "Invalid Information",
+                description: "Please select valid order to be finished."
+            });
+            return;
+        }
+
         api.post('/orders/finish', { orderId })
             .then(response => {
                 // Handle successful response
@@ -110,6 +144,15 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
 
     // handle Waiter's Decline order Submit
     const handleOrderDecline = (orderId: string) => {
+        // Validate the orderId
+        if (!orderId) {
+            toast({
+                title: "Invalid Information",
+                description: "Please select valid order to be declined."
+            });
+            return;
+        }
+
         api.post('/orders/decline', { orderId })
             .then(response => {
                 // Handle successful response
@@ -124,6 +167,15 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
 
     // handle Chef's Start order Submit
     const handleOrderStart = (orderId: string) => {
+        // Validate the orderId
+        if (!orderId) {
+            toast({
+                title: "Invalid Information",
+                description: "Please select valid order to be started."
+            });
+            return;
+        }
+
         api.post('/orders/start', { orderId })
             .then(response => {
                 // Handle successful response
@@ -138,6 +190,15 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
 
     // handle Chef's Complete order Submit
     const handleOrderComplete = (orderId: string) => {
+        // Validate the orderId
+        if (!orderId) {
+            toast({
+                title: "Invalid Information",
+                description: "Please select valid order to be completed."
+            });
+            return;
+        }
+
         api.post('/orders/complete', { orderId })
             .then(response => {
                 // Handle successful response
@@ -157,69 +218,73 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
             <div>No Orders</div>
         )
     } else {
-        // Waiters Perspective
-        // orderContent = (
-        //     <Table>
-        //         <TableCaption>Orders</TableCaption>
-        //         <TableBody>
-        //             {orders.map((order) => (
-        //                 <TableRow key={order._id}>
-        //                     <TableCell>{order.name}</TableCell>
-        //                     <TableCell>{`${order.quantity}`}</TableCell>
-        //                     <TableCell align={"center"}>
-        //                         {order.status === 'Completed' ? (
-        //                             <Button className={'w-full'} onClick={() => handleOrderFinish(order._id)}>Finish Order</Button>
-        //                         ) : order.status === 'Cancelled' ? (
-        //                             <Button className={'w-full'} onClick={() => handleOrderDecline(order._id)}>Confirm Cancel</Button>
-        //                         ) : (
-        //                             order.status
-        //                         )}
-        //                     </TableCell>
-        //                 </TableRow>
-        //             ))}
-        //         </TableBody>
-        //     </Table>
-        // )
-
-        // Chef's Perspective
-        orderContent = (
-            <Table>
-                <TableCaption>Orders</TableCaption>
-                <TableBody>
-                    {orders.map((order) => (
-                        <TableRow key={order._id}>
-                            <TableCell>{order.name}</TableCell>
-                            <TableCell>{`${order.quantity}`}</TableCell>
-                            <TableCell align={"center"}>
-                                {order.status === 'Pending' ? (
-                                    <Button className={'w-full'} onClick={() => handleOrderStart(order._id)}>Start</Button>
-                                ) : order.status === 'InProgress' ? (
-                                    <Button className={'w-full'} onClick={() => handleOrderComplete(order._id)}>Complete</Button>
-                                ) : (
-                                    order.status
-                                )}
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-        )
-
-        // Admin Perspective
-        // orderContent = (
-        //     <Table>
-        //         <TableCaption>Orders</TableCaption>
-        //         <TableBody>
-        //             {orders.map((order) => (
-        //                 <TableRow key={order._id}>
-        //                     <TableCell>{order.name}</TableCell>
-        //                     <TableCell>{`${order.quantity}`}</TableCell>
-        //                     <TableCell align={"center"}>{order.status}</TableCell>
-        //                 </TableRow>
-        //             ))}
-        //         </TableBody>
-        //     </Table>
-        // )
+        if (role === 'waiter') {
+            // waiter's Perspective
+            orderContent = (
+                <Table>
+                    <TableCaption>Orders</TableCaption>
+                    <TableBody>
+                        {orders.map((order) => (
+                            <TableRow key={order._id}>
+                                <TableCell>{order.name}</TableCell>
+                                <TableCell>{`${order.quantity}`}</TableCell>
+                                <TableCell align={"center"}>
+                                    {order.status === 'Completed' ? (
+                                        <Button className={'w-full'} onClick={() => handleOrderFinish(order._id)}>Finish Order</Button>
+                                    ) : order.status === 'Cancelled' ? (
+                                        <Button className={'w-full'} onClick={() => handleOrderDecline(order._id)}>Confirm Cancel</Button>
+                                    ) : (
+                                        order.status
+                                    )}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            )
+        } else if (role === 'chef') {
+            // Chef's Perspective
+            orderContent = (
+                <Table>
+                    <TableCaption>Orders</TableCaption>
+                    <TableBody>
+                        {orders.map((order) => (
+                            <TableRow key={order._id}>
+                                <TableCell>{order.name}</TableCell>
+                                <TableCell>{`${order.quantity}`}</TableCell>
+                                <TableCell align={"center"}>
+                                    {order.status === 'Pending' ? (
+                                        <Button className={'w-full'}
+                                                onClick={() => handleOrderStart(order._id)}>Start</Button>
+                                    ) : order.status === 'InProgress' ? (
+                                        <Button className={'w-full'}
+                                                onClick={() => handleOrderComplete(order._id)}>Complete</Button>
+                                    ) : (
+                                        order.status
+                                    )}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            )
+        } else if (role === 'owner') {
+            // Admin Perspective
+            orderContent = (
+                <Table>
+                    <TableCaption>Orders</TableCaption>
+                    <TableBody>
+                        {orders.map((order) => (
+                            <TableRow key={order._id}>
+                                <TableCell>{order.name}</TableCell>
+                                <TableCell>{`${order.quantity}`}</TableCell>
+                                <TableCell align={"center"}>{order.status}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            )
+        }
     }
 
     // Waiters Footer Content
@@ -332,19 +397,28 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
 
 
     return (
-        <Card className={'flex flex-col min-w-96 min-h-96 m-3'}>
-            <CardHeader>
-                <CardTitle>Table {tableNo}</CardTitle>
-                <CardDescription>{tableSeats} seats</CardDescription>
-            </CardHeader>
-            <CardContent className={'flex-grow'}>
-                {orderContent}
-            </CardContent>
-            <CardFooter className="flex justify-end mb-1 gap-3">
-                {deleteOrderContent}
-                {/*{cancelOrderContent}*/}
-                {addOrderContent}
-            </CardFooter>
-        </Card>
+        <>
+            <Toaster/>
+            <Card className={'flex flex-col min-w-96 min-h-96 m-3'}>
+                <CardHeader>
+                    <CardTitle>Table {tableNo}</CardTitle>
+                    <CardDescription>{tableSeats} seats</CardDescription>
+                </CardHeader>
+                <CardContent className={'flex-grow'}>
+                    {orderContent}
+                </CardContent>
+                <CardFooter className="flex justify-end mb-1 gap-3">
+                    {role === 'waiter' && (
+                        <>
+                            {deleteOrderContent}
+                            {addOrderContent}
+                        </>
+                    )}
+                    {role === 'chef' && (
+                        cancelOrderContent
+                    )}
+                </CardFooter>
+            </Card>
+        </>
     )
 }
