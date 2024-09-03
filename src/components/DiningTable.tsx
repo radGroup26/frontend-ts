@@ -8,6 +8,7 @@ import axios from "axios";
 import {useAuth} from "@/context/AuthContext.tsx";
 import {Order} from "@/types/order.tsx";
 import {Item} from "@/types/Item.tsx";
+import api from "@/lib/api/api.ts"
 
 interface DiningTableProps {
     tableId: string;
@@ -19,7 +20,7 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
     const { selectedRestaurant } = useAuth();
     const [orders, setOrders] = useState<Order[]>([]);
     const [items, setItems] = useState<Item[]>([]);
-    const [newOrder, setNewOrder] = useState({ restaurantId: selectedRestaurant._id,
+    const [newOrder, setNewOrder] = useState({ restaurantId: selectedRestaurant?._id,
         tableId:tableId, name: "", quantity: 1, status: "Pending" });
     const [deleteOrder, setDeleteOrder] = useState({ orderId: "" });
     const token = localStorage.getItem('accessToken');
@@ -33,10 +34,7 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
 
     useEffect(() => {
         // // Fetch orders from the backend
-        axios.get(`http://localhost:3000/orders/${tableId}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`}
-        })
+        api.get(`/orders/${tableId}`)
             .then(response => {
                 setOrders(response.data);
             })
@@ -45,10 +43,7 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
             });
 
         // Fetch available order types from the backend
-        axios.get(`http://localhost:3000/items/${selectedRestaurant._id}`, {
-                headers: {
-                'Authorization': `Bearer ${token}`}
-            })
+        api.get(`/items/${selectedRestaurant._id}`)
             .then(response => {
                 setItems(response.data);
             })
@@ -60,10 +55,7 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
     // handle Waiter's Add order Submit
     const handleAddOrder = (e) => {
         e.preventDefault();
-        axios.post("http://localhost:3000/orders/create", newOrder, {
-            headers: {
-                'Authorization': `Bearer ${token}`}
-        })
+        api.post("/orders/create", newOrder)
             .then(response => {
                 setOrders([...orders, response.data]);
                 setNewOrder({ restaurantId: selectedRestaurant._id,
@@ -77,10 +69,7 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
     // handle Chef's Delete order Submit
     const handleDeleteOrder = (e) => {
         e.preventDefault();
-        axios.post("http://localhost:3000/orders/delete", deleteOrder, {
-            headers: {
-                'Authorization': `Bearer ${token}`}
-        })
+        api.post("/orders/delete", deleteOrder)
             .then(response => {
                 setOrders([...orders, response.data]);
                 setDeleteOrder({ orderId: "" });
@@ -93,17 +82,15 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
     // handle Waiter's Finish order Submit
     const handleOrderFinish = (e) => {
         e.preventDefault();
-        // axios.post('http://localhost:3000/orders/finish', { orderId: order._id }, {
-        //     headers: { 'Authorization': `Bearer ${token}` }
-        // })
-        //     .then(response => {
-        //         // Handle successful response
-        //         console.log('Order finished:', response.data);
-        //     })
-        //     .catch(error => {
-        //         // Handle error
-        //         console.error('Error finishing order:', error);
-        //     });
+        api.post('/orders/finish', { orderId: order._id })
+            .then(response => {
+                // Handle successful response
+                console.log('Order finished:', response.data);
+            })
+            .catch(error => {
+                // Handle error
+                console.error('Error finishing order:', error);
+            });
     }
 
     // Display orders
@@ -116,8 +103,8 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
                 {orders.map((order) => (
                     <TableRow key={order._id}>
                         <TableCell>{order.name}</TableCell>
-                        <TableCell>{order.quantity}</TableCell>
-                        <TableCell>
+                        <TableCell>{`${order.quantity}`}</TableCell>
+                        <TableCell align={"center"}>
                             {order.status === 'Completed' ? (
                                 <Button onClick={handleOrderFinish}>Finish Order</Button>
                             ) : (
