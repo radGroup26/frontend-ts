@@ -36,7 +36,7 @@ import { Pencil, Trash2 } from 'lucide-react';
 
 
 export default function Menu() {
-    const { selectedRestaurant } = useAuth();
+    const { selectedRestaurant, role } = useAuth();
     const [items, setItems] = useState<Item[]>([]);
     const [newItem, setNewItem] = useState<Item>({
         restaurantId: selectedRestaurant?._id,
@@ -370,38 +370,51 @@ export default function Menu() {
         </Dialog>
     )
 
-    return (
-        <div className={"flex flex-col m-4 p-4"}>
-            <Toaster/>
-            <div className={"flex justify-end gap-3"}>
-                {deleteItemContent}
-                {editItemContent}
-                {addItemContent}
-            </div>
-            <div className={"p-4"}>
-                <Table>
-                    <TableCaption>A list of menu items.</TableCaption>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-[300px]">Name</TableHead>
-                            <TableHead>Description</TableHead>
-                            <TableHead>Option</TableHead>
-                            <TableHead className="text-right">Price</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {items.map(item => (
-                            <TableRow key={item._id}>
-                                <TableCell className="font-medium">{item.name}</TableCell>
-                                <TableCell>{item.description}</TableCell>
-                                <TableCell>{item.option}</TableCell>
-                                <TableCell className="text-right">{item.price}</TableCell>
+    let content;
+    if (role === 'owner') {
+        content = (
+            <div className={"flex flex-col m-4 p-4"}>
+                <Toaster/>
+                <div className={"flex justify-end gap-3"}>
+                    {deleteItemContent}
+                    {editItemContent}
+                    {addItemContent}
+                </div>
+                <div className={"p-4"}>
+                    <Table>
+                        <TableCaption>A list of menu items.</TableCaption>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-[300px]">Name</TableHead>
+                                <TableHead>Description</TableHead>
+                                <TableHead>Option</TableHead>
+                                <TableHead className="text-right">Price</TableHead>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-
+                        </TableHeader>
+                        <TableBody>
+                            {items.map(item => (
+                                <TableRow key={item._id}>
+                                    <TableCell className="font-medium">{item.name}</TableCell>
+                                    <TableCell>{item.description}</TableCell>
+                                    <TableCell>{item.option}</TableCell>
+                                    <TableCell className="text-right">{item.price}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
             </div>
-        </div>
+        )
+    } else {
+        content = (
+            <div className={"flex flex-col justify-center items-center h-full"}>
+                <p className={"text-gray-200 text-8xl p-4 mt-40"}>ツ</p>
+                <p className={"text-gray-300 p-4"}>Content Restricted</p>
+            </div>
+        )
+    }
+
+    return (
+        <div>{content}</div>
     );
 }
