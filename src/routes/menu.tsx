@@ -32,18 +32,27 @@ import api from "@/lib/api/api.ts";
 import {Button} from "@/components/ui/button.tsx";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
+import { Pencil } from 'lucide-react';
 
 
 export default function Menu() {
     const { selectedRestaurant } = useAuth();
     const [items, setItems] = useState<Item[]>([]);
-    const [newItem, setNewItem] = useState({
+    const [newItem, setNewItem] = useState<Item>({
         restaurantId: selectedRestaurant?._id,
         name: "",
         description: "",
         option: "",
-        price: NaN
+        price: NaN,
+        _id: ""
     });
+    const [editItem, setEditItem] = useState<Item>({
+        description: "",
+        name: "",
+        option: "",
+        price: 0,
+        restaurantId: selectedRestaurant?._id,
+        _id: ""});
     const { toast } = useToast();
 
     useEffect(() => {
@@ -56,36 +65,42 @@ export default function Menu() {
             });
     }, [newItem]);
 
-    const handleCreateItem = (e) => {
-        e.preventDefault()
-        console.log("Creating item:", newItem);
-        // Validate the newItem
-        if (!newItem.name) {
+    const validateItem = (item) => {
+        if (!item.name) {
             toast({
                 title: "Invalid Name",
                 description: "Please enter a valid name for item."
             });
-            return;
-        } else if (!newItem.description) {
+            return false;
+        } else if (!item.description) {
             toast({
                 title: "Invalid Description",
                 description: "Please enter a valid description for item."
             });
-            return;
-        } else if (!newItem.option) {
+            return false;
+        } else if (!item.option) {
             toast({
                 title: "Invalid Option",
                 description: "Please enter a valid option for item."
             });
-            return;
-        } else if (!newItem.price) {
+            return false;
+        } else if (!item.price) {
             toast({
                 title: "Invalid Price",
                 description: "Please enter a valid price for item."
             });
-            return;
+            return false;
+        } else {
+            return true;
         }
+    }
 
+    const handleCreateItem = (e) => {
+        e.preventDefault()
+        console.log("Creating item:", newItem);
+        // Validate the newItem
+
+    if (validateItem(newItem)) {
         api.post('/items/create', newItem )
             .then(response => {
                 // Handle successful response
@@ -100,73 +115,171 @@ export default function Menu() {
                 console.error('Error adding item:', error);
             });
     }
+    }
 
-    return(
+    let addItemContent = (
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button>Add Item</Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Add Item</DialogTitle>
+                    <DialogDescription>
+                        Add a new item to the menu.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4" >
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="name" className="text-right">
+                            Name
+                        </Label>
+                        <Input id="name"
+                               placeholder="Margarita"
+                               className="col-span-3"
+                               value = {newItem.name}
+                               onChange={(e) => setNewItem({...newItem, name: e.target.value})}/>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="description" className="text-right">
+                            Description
+                        </Label>
+                        <Input id="description"
+                               placeholder="With mozzarella and tomato sause"
+                               value = {newItem.description}
+                               className="col-span-3"
+                               onChange={(e) => setNewItem({...newItem, description: e.target.value})}/>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="option" className="text-right">
+                            Option
+                        </Label>
+                        <Select id="option" value = {newItem.option}
+                                onValueChange={(value) => setNewItem({...newItem, option: value})}>
+                            <SelectTrigger className="col-span-3">
+                                <SelectValue placeholder="Option" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Small">Small</SelectItem>
+                                <SelectItem value="Medium">Medium</SelectItem>
+                                <SelectItem value="Large">Large</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="price" className="text-right">
+                            Price
+                        </Label>
+                        <Input id="price"
+                               placeholder="1700"
+                               className="col-span-3"
+                               onChange={(e) => setNewItem({...newItem, price: Number(e.target.value)})}
+                        />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button onClick={handleCreateItem}>Confirm</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+
+    let editItemContent = (
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button variant="outline"><Pencil className={"w-4 p-0 m-0"}/></Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Edit Item</DialogTitle>
+                    <DialogDescription>
+                        Edit existing item in menu.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="select" className="text-right">
+                            Select Item
+                        </Label>
+                        <Select id="select"
+                                onValueChange={(value) => {
+                                    const selectedItem = items.find(item => item.name + ' ' + item.option === value);
+                                    if (selectedItem) {
+                                        setEditItem(selectedItem);
+                                    }
+                                }}>
+                            <SelectTrigger className="col-span-3">
+                                <SelectValue placeholder="Item"/>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {items.map((type) => (
+                                    <SelectItem key={type._id} value={type.name + ' ' + type.option}>
+                                        {type.name + ' ' + type.option}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="name" className="text-right">
+                            Name
+                        </Label>
+                        <Input id="name"
+                               value={editItem.name || ' '}
+                               className="col-span-3"
+                               onChange={(e) => setEditItem({...editItem, name: e.target.value})}
+                        />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="description" className="text-right">
+                            Description
+                        </Label>
+                        <Input id="description"
+                               value={editItem.description || ' '}
+                               className="col-span-3"
+                               onChange={(e) => setEditItem({...editItem, description: e.target.value})}
+                        />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="option" className="text-right">
+                            Option
+                        </Label>
+                        <Select id="option" value={editItem.option || ''}
+                                onValueChange={(value) => setEditItem({...editItem, option: value})}>
+                            <SelectTrigger className="col-span-3">
+                                <SelectValue placeholder="Option"/>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Small">Small</SelectItem>
+                                <SelectItem value="Medium">Medium</SelectItem>
+                                <SelectItem value="Large">Large</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="price" className="text-right">
+                            Price
+                        </Label>
+                        <Input id="price"
+                               value={editItem.price || 0}
+                               className="col-span-3"
+                               onChange={(e) => setEditItem({...editItem, price: Number(e.target.value)})}
+                        />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button onClick={handleCreateItem}>Confirm</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+
+    return (
         <div className={"flex flex-col m-4 p-4"}>
-            <Toaster />
-            <div className={"flex justify-end"}>
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <Button>Add Item</Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Add Item</DialogTitle>
-                            <DialogDescription>
-                                Add a new item to the menu.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4" >
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="name" className="text-right">
-                                    Name
-                                </Label>
-                                <Input id="name"
-                                       placeholder="Margarita"
-                                       className="col-span-3"
-                                       onChange={(e) => setNewItem({...newItem, name: e.target.value})}/>
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="description" className="text-right">
-                                    Description
-                                </Label>
-                                <Input id="description"
-                                       placeholder="With mozzarella and tomato sause"
-                                       className="col-span-3"
-                                       onChange={(e) => setNewItem({...newItem, description: e.target.value})}/>
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="option" className="text-right">
-                                    Option
-                                </Label>
-                                <Select id="option" onValueChange={(value) => setNewItem({...newItem, option: value})}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Option" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Small">Small</SelectItem>
-                                        <SelectItem value="Medium">Medium</SelectItem>
-                                        <SelectItem value="Large">Large</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="price" className="text-right">
-                                    Price
-                                </Label>
-                                <Input id="price"
-                                       placeholder="1700"
-                                       className="col-span-3"
-                                       onChange={(e) => setNewItem({...newItem, price: Number(e.target.value)})}
-                                />
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <Button onClick={handleCreateItem}>Add Item</Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-                {/*<Button variant="outline">Edit Item</Button>*/}
+            <Toaster/>
+            <div className={"flex justify-end gap-3"}>
+                {editItemContent}
+                {addItemContent}
             </div>
             <div className={"p-4"}>
                 <Table>
