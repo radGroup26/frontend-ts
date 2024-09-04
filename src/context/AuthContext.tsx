@@ -3,6 +3,12 @@ import axios from 'axios';
 import { Restaurant } from '@/types/retaurant';
 import fetchRole from '@/lib/api/fetchRole';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { jwtDecode } from 'jwt-decode';
+
+type User = {
+    username: string;
+    userId: string;
+};
 
 interface AuthContextType {
     isAuthenticated: boolean;
@@ -11,14 +17,27 @@ interface AuthContextType {
     selectedRestaurant: Restaurant | undefined;
     setSelectedRestaurant: Dispatch<Restaurant | undefined>;
     role: string | undefined;
+    user: User | undefined;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+function decodeJWT(token: string) {
+    try {
+        const decoded = jwtDecode<{ UserInfo: { username: string; userId: string } }>(token);
+        return decoded.UserInfo;
+    } catch (error) {
+        console.error('Failed to decode JWT', error);
+        return null;
+    }
+};
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [loading, setLoading] = useState(true);
     const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | undefined>(undefined);
+    const [user, setUser] = useState<User | undefined>(undefined);
+
 
     const queryClient = useQueryClient();
 
@@ -69,6 +88,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
     }, [selectedRestaurant, isAuthenticated]);
 
+    useEffect(() => {
+        if (isAuthenticated) {
+            const token = localStorage.getItem('accessToken');
+            if (token) {
+                const decoded = decodeJWT(token);
+                if (decoded) {
+                    setUser({ username: decoded.username, userId: decoded.userId });
+                }
+            }
+        } else {
+            setUser(undefined);
+        }
+    }, [isAuthenticated]);
+
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -80,7 +113,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             logout,
             selectedRestaurant,
             setSelectedRestaurant,
-            role: role.data
+            role: role.data,
+            user
         }}>
             {children}
         </AuthContext.Provider>
