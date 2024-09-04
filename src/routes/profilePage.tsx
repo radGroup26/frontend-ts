@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import ProfileCard from '../components/ProfileCard'; 
 
 interface User {
   name: string;
@@ -10,27 +11,13 @@ const ProfilePage: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    fetch('/api/user')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => setUser(data))
-      .catch(error => console.error('There was a problem with the fetch operation:', error));
+    setUser({name: 'John Doe', email: 'johndoe@gmail.com', role: 'admin'});
   }, []);
 
-  if (!user) {
-    return <div>Loading...</div>;
-  }
-
   return (
-    <div>
-      <h1>Profile Page</h1>
-      <p>Name: {user.name}</p>
-      <p>Email: {user.email}</p>
-      <p>Role: {user.role}</p>
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold mb-6 text-center">Profile Page</h1>
+      <ProfileCard user={user} />
     </div>
   );
 };

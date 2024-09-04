@@ -16,7 +16,7 @@ import Login from './routes/login';
 import ProtectedRoute from './components/ProtectedRoute';
 import GuestRoute from './components/GuestRoute';
 import Dashboard from './routes/dashboard';
-import ProfilePage from './routes/profilepage';
+import ProfilePage from './routes/profilePage';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'

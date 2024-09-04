@@ -20,6 +20,7 @@ import ManageTeamDialog from "./ManageTeamDialog";
 import Nav from "./Nav";
 import Switcher from "./Switcher";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
+import { Link } from 'react-router-dom';
 
 
 const navItems1 = [
@@ -150,6 +151,7 @@ export default function Layout({ children }: { children: JSX.Element }) {
                             {navItems2.map((item, index) => (
                                 <Tooltip key={index}>
                                     <TooltipTrigger asChild>
+                                        <Link to={item.route}>
                                         <Button
                                             variant="ghost"
                                             size="icon"
@@ -158,6 +160,7 @@ export default function Layout({ children }: { children: JSX.Element }) {
                                         >
                                             <item.icon className="size-5" />
                                         </Button>
+                                        </Link>
                                     </TooltipTrigger>
                                     <TooltipContent side="right" sideOffset={5}>
                                         {item.tooltip}
