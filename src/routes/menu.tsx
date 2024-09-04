@@ -32,7 +32,7 @@ import api from "@/lib/api/api.ts";
 import {Button} from "@/components/ui/button.tsx";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
-import { Pencil } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 
 
 export default function Menu() {
@@ -52,6 +52,13 @@ export default function Menu() {
         option: "",
         price: 0,
         restaurantId: selectedRestaurant?._id,
+        _id: ""})
+    const [deleteItem, setDeleteItem] = useState<Item>({
+        description: "",
+        name: "",
+        option: "",
+        price: 0,
+        restaurantId: selectedRestaurant?._id,
         _id: ""});
     const { toast } = useToast();
 
@@ -63,7 +70,7 @@ export default function Menu() {
             .catch(error => {
                 console.error("Error fetching order types:", error);
             });
-    }, [newItem]);
+    }, [newItem, editItem, deleteItem]);
 
     const validateItem = (item) => {
         if (!item.name) {
@@ -97,24 +104,69 @@ export default function Menu() {
 
     const handleCreateItem = (e) => {
         e.preventDefault()
-        console.log("Creating item:", newItem);
+        // console.log("Creating item:", newItem);
         // Validate the newItem
+        if (validateItem(newItem)) {
+            api.post('/items/create', newItem )
+                .then(response => {
+                    // Handle successful response
+                    console.log('Item Added:', response.data);
+                    toast({
+                        title: "Item Added",
+                    });
+                    setNewItem({...newItem, name: "", description: "", option: "", price: NaN});
+                })
+                .catch(error => {
+                    // Handle error
+                    console.error('Error adding item:', error);
+                });
+        }
+    }
 
-    if (validateItem(newItem)) {
-        api.post('/items/create', newItem )
+    const handleEditItem = (e) => {
+        e.preventDefault()
+        // console.log("Editing item:", editItem);
+        // Validate the newItem
+        if (validateItem(editItem)) {
+            api.post('/items/edit', editItem )
+                .then(response => {
+                    // Handle successful response
+                    console.log('Item Edited:', response.data);
+                    toast({
+                        title: "Item Edited",
+                    });
+                    setEditItem({...editItem, name: "", description: "", option: "", price: NaN});
+                })
+                .catch(error => {
+                    // Handle error
+                    console.error('Error editing item:', error);
+                });
+        }
+    }
+
+    const handleDeleteItem = (e) => {
+        e.preventDefault()
+        if (!deleteItem._id) {
+            toast({
+                title: "Invalid Item",
+                description: "Please select a valid item to delete."
+            });
+            return;
+        }
+
+        api.post('/items/delete',  {itemId: deleteItem._id}  )
             .then(response => {
                 // Handle successful response
-                console.log('Item Added:', response.data);
+                console.log('Item Deleted:', response.data);
                 toast({
-                    title: "Item Added",
+                    title: "Item Delete",
                 });
-                setNewItem({...newItem, name: "", description: "", option: "", price: NaN});
+                setDeleteItem({...deleteItem, _id: "", name: "", description: "", option: "", price: NaN});
             })
             .catch(error => {
                 // Handle error
-                console.error('Error adding item:', error);
+                console.error('Error deleting item:', error);
             });
-    }
     }
 
     let addItemContent = (
@@ -268,7 +320,51 @@ export default function Menu() {
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button onClick={handleCreateItem}>Confirm</Button>
+                    <Button onClick={handleEditItem}>Confirm</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+
+    let deleteItemContent = (
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button variant="outline"><Trash2 className={"w-4 p-0 m-0"}/></Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Delete Item</DialogTitle>
+                    <DialogDescription>
+                        Delete existing item in menu.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="select" className="text-right">
+                            Select Item
+                        </Label>
+                        <Select id="select"
+                                onValueChange={(value) => {
+                                    const selectedItem = items.find(item => item.name + ' ' + item.option === value);
+                                    if (selectedItem) {
+                                        setDeleteItem(selectedItem);
+                                    }
+                                }}>
+                            <SelectTrigger className="col-span-3">
+                                <SelectValue placeholder="Item"/>
+                            </SelectTrigger>
+                            <SelectContent>
+                                {items.map((type) => (
+                                    <SelectItem key={type._id} value={type.name + ' ' + type.option}>
+                                        {type.name + ' ' + type.option}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button onClick={handleDeleteItem}>Confirm</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -278,6 +374,7 @@ export default function Menu() {
         <div className={"flex flex-col m-4 p-4"}>
             <Toaster/>
             <div className={"flex justify-end gap-3"}>
+                {deleteItemContent}
                 {editItemContent}
                 {addItemContent}
             </div>
