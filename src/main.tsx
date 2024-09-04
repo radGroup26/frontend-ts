@@ -21,6 +21,7 @@ import ProfilePage from './routes/profilePage';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import Invites from './routes/invites';
+import Menu from "@/routes/menu.tsx";
 
 const router = createBrowserRouter([
   {
@@ -39,6 +40,10 @@ const router = createBrowserRouter([
       {
         path: "account",
         element: <ProtectedRoute element={<ProfilePage />} />,
+      },
+      {
+        path: "menu",
+        element: <ProtectedRoute element={<Menu/>} />,
       }
     ]
   },
