@@ -5,10 +5,16 @@ import { Badge } from '@/components/ui/badge';
 import { User } from 'lucide-react';
 
 interface User {
-  name: string;
+  First_Name: string;
+  Last_Name: string;
   email: string;
   role: string;
 }
+/* interface User {
+  name: string;
+  email: string;
+  role: string;
+} */
 
 const ProfileCard: React.FC<{ user: User | null }> = ({ user }) => {
   if (!user) {
@@ -23,7 +29,7 @@ const ProfileCard: React.FC<{ user: User | null }> = ({ user }) => {
           <AvatarFallback><User className="w-8 h-8" /></AvatarFallback>
         </Avatar> */}
         <div>
-          <CardTitle className="text-2xl font-bold">{user.name}</CardTitle>
+          <CardTitle className="text-2xl font-bold">{user.First_Name}</CardTitle>
           <Badge variant="secondary" className="mt-1">{user.role}</Badge>
         </div>
       </CardHeader>
