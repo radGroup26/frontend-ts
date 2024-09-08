@@ -203,9 +203,9 @@ export default function Layout({ children }: { children: JSX.Element }) {
                 <CreateRestaurantDialog />
                 <ManageTeamDialog />
 
-            <div>{role}</div>
+            {/* <div>{role}</div>
             <div>username {user?.username}</div>
-            <div>userId {user?.userId}</div>
+            <div>userId {user?.userId}</div> */}
 
             </header>
 
