@@ -23,7 +23,7 @@ import ManageTeamDialog from "./ManageTeamDialog";
 import Nav from "./Nav";
 import Switcher from "./Switcher";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
 
 
 const navItems1 = [

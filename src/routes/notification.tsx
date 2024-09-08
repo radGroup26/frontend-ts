@@ -7,15 +7,18 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card.tsx";
-import { Button } from "@/components/ui/button.tsx";
-import { Label } from "@/components/ui/label.tsx";
-import { Input } from "@/components/ui/input.tsx";
+} from "@/components/ui/card";
+
 import { formatDistanceToNow } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import axios from "axios";
+import moment from "moment";
+import { useAuth } from "@/context/AuthContext"; // Adjust path as necessary
 
 interface Notification {
-  id: string;
+  _id: string;
   title: string;
   message: string;
   createdAt: string;
@@ -24,28 +27,14 @@ interface Notification {
 function Notification() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [editMode, setEditMode] = useState(false); // For toggling between create and edit mode
+  const [editMode, setEditMode] = useState(false);
   const [currentNotification, setCurrentNotification] =
-    useState<Notification | null>(null); // To hold the notification being edited
+    useState<Notification | null>(null);
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
 
-  //   const fetchNotifications = async () => {
-  //     try {
-  //       const mockData = [
-  //         {
-  //           id: "1",
-  //           title: "🚪 Heads Up!",
-  //           message:
-  //             "We're taking a short break and will be closed on 2024.09.15. We can't wait to welcome you back soon. Thank you for your understanding!",
-  //           createdAt: "2024-09-03T08:00:00Z",
-  //         },
-  //       ];
-  //       setNotifications(mockData);
-  //     } catch (error) {
-  //       console.error("Error fetching notifications:", error);
-  //     }
-  //   };
+  const { role } = useAuth(); // Get the user role from the context
+
 
   useEffect(() => {
     fetchNotifications();
@@ -53,7 +42,9 @@ function Notification() {
 
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get("/api/notification/");
+      const response = await axios.get(
+        "http://localhost:3000/api/notifications/"
+      );
       setNotifications(response.data);
     } catch (error) {
       console.error("Error fetching notifications:", error);
@@ -67,29 +58,31 @@ function Notification() {
       const now = new Date().toISOString();
 
       if (editMode && currentNotification) {
-        // If in edit mode, update the notification
         const updatedNotification = {
           ...currentNotification,
           title,
           message,
+          createdAt: now,
         };
         const response = await axios.put(
-          `/api/notification/save/${currentNotification.id}`,
+          `http://localhost:3000/api/notifications/save/${currentNotification._id}`,
           updatedNotification
         );
 
         setNotifications((prevNotifications) =>
           prevNotifications.map((n) =>
-            n.id === currentNotification.id ? response.data : n
+            n._id === currentNotification._id ? response.data : n
           )
         );
       } else {
-        // Otherwise, create a new notification
-        const response = await axios.post("/api/notification/add", {
-          title,
-          message,
-          createdAt: now,
-        });
+        const response = await axios.post(
+          "http://localhost:3000/api/notifications/add",
+          {
+            title,
+            message,
+            createdAt: now,
+          }
+        );
         const newNotification: Notification = response.data;
         setNotifications((prevNotifications) => [
           ...prevNotifications,
@@ -100,18 +93,20 @@ function Notification() {
       setTitle("");
       setMessage("");
       setShowForm(false);
-      setEditMode(false); // Reset mode to create
-      setCurrentNotification(null); // Reset current notification
+      setEditMode(false);
+      setCurrentNotification(null);
     } catch (error) {
       console.error("Error creating/updating notification:", error);
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (_id: string) => {
     try {
-      await axios.delete(`/api/notification/delete/${id}`);
+      await axios.delete(
+        `http://localhost:3000/api/notifications/delete/${_id}`
+      );
       setNotifications((prevNotifications) =>
-        prevNotifications.filter((n) => n.id !== id)
+        prevNotifications.filter((n) => n._id !== _id)
       );
     } catch (error) {
       console.error("Error deleting notification:", error);
@@ -133,52 +128,59 @@ function Notification() {
           Notification <BellRing className="ml-5" />
         </h2>
 
-        <Button
-          onClick={() => {
-            setShowForm(true);
-            setEditMode(false); // Set to create mode
-            setTitle("");
-            setMessage("");
-          }}
-          className="absolute top-5 right-5"
-        >
-          + Create New Notification
-        </Button>
+        {/* Show create button only for the owner */}
+        {role === "owner" && (
+          <Button
+            onClick={() => {
+              setShowForm(true);
+              setEditMode(false);
+              setTitle("");
+              setMessage("");
+            }}
+            className="absolute top-5 right-5"
+          >
+            + Create New Notification
+          </Button>
+        )}
 
         <div className="mt-10">
           <div className="flex flex-col gap-4">
-            {notifications &&
+            {Array.isArray(notifications) &&
               notifications.map((notification) => (
                 <Card
-                  key={notification.id}
+                  key={notification._id}
                   className="w-full max-w-[900px] h-auto"
                 >
                   <CardHeader>
                     <CardTitle>{notification.title}</CardTitle>
                     <CardDescription>
-                      {formatDistanceToNow(new Date(notification.createdAt), {
-                        addSuffix: true,
-                      })}
+                      {moment(notification.createdAt).fromNow()}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p>{notification.message}</p>
                   </CardContent>
                   <CardFooter className="py-2 space-x-5">
-                    <Button
-                      variant="outline"
-                      onClick={() => handleEdit(notification)}
-                    >
-                      Edit
-                    </Button>
-                    <Button onClick={() => handleDelete(notification.id)}>
-                      Delete
-                    </Button>
+                    {/* Show edit and delete buttons only for the owner */}
+                    {role === "owner" && (
+                      <>
+                        <Button
+                          variant="outline"
+                          onClick={() => handleEdit(notification)}
+                        >
+                          Edit
+                        </Button>
+                        <Button onClick={() => handleDelete(notification._id)}>
+                          Delete
+                        </Button>
+                      </>
+                    )}
                   </CardFooter>
                 </Card>
               ))}
           </div>
         </div>
+        
         {/* Create & Edit Form */}
         {showForm && (
           <Card className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-80">
@@ -206,7 +208,7 @@ function Notification() {
                   <textarea
                     placeholder="Enter the Message..."
                     id="message"
-                    className="flex h-32 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm disabled:opacity-50"
+                    className="flex h-32 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm  disabled:opacity-50"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     required

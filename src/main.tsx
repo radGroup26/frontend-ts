@@ -1,14 +1,10 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./index.css";
 
-import {
-  createBrowserRouter,
-  RouterProvider,
-} from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-import { AuthProvider } from '@/context/AuthContext';
-
+import { AuthProvider } from "@/context/AuthContext";
 
 import Root from './routes/root'
 import Register from './routes/register'
@@ -16,6 +12,8 @@ import Login from './routes/login';
 import ProtectedRoute from './components/ProtectedRoute';
 import GuestRoute from './components/GuestRoute';
 import Dashboard from './routes/dashboard';
+import ProfilePage from './routes/profilePage';
+import Notification from "@/routes/notification.tsx";
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
@@ -32,11 +30,18 @@ const router = createBrowserRouter([
       {
         path: "dashboard",
         element: <ProtectedRoute element={<Dashboard />} />,
-
       },
       {
         path: "invites",
-        element: <ProtectedRoute element={<Invites/>} />,
+        element: <ProtectedRoute element={<Invites />} />,
+      },
+      {
+        path: "notification",
+        element: <ProtectedRoute element={<Notification />} />,
+      },
+      {
+        path: "account",
+        element: <ProtectedRoute element={<ProfilePage />} />,
       },
       {
         path: "menu",
@@ -60,13 +65,12 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <GuestRoute element={<Login />} />,
-  }
+  },
 ]);
 
+const queryClient = new QueryClient({});
 
-const queryClient = new QueryClient({})
-
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -74,5 +78,5 @@ createRoot(document.getElementById('root')!).render(
       </AuthProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
-  </StrictMode >,
-)
+  </StrictMode>
+);
