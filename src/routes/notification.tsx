@@ -9,13 +9,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
 import moment from "moment";
 import { useAuth } from "@/context/AuthContext"; // Adjust path as necessary
+import api from "@/lib/api/api";
 
 interface Notification {
   _id: string;
@@ -42,8 +42,8 @@ function Notification() {
 
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:3000/api/notifications/"
+      const response = await api.get(
+        "/notifications/"
       );
       setNotifications(response.data);
     } catch (error) {
@@ -64,8 +64,8 @@ function Notification() {
           message,
           createdAt: now,
         };
-        const response = await axios.put(
-          `http://localhost:3000/api/notifications/save/${currentNotification._id}`,
+        const response = await api.put(
+          `/notifications/save/${currentNotification._id}`,
           updatedNotification
         );
 
@@ -75,8 +75,8 @@ function Notification() {
           )
         );
       } else {
-        const response = await axios.post(
-          "http://localhost:3000/api/notifications/add",
+        const response = await api.post(
+          "/api/notifications/add",
           {
             title,
             message,
@@ -102,8 +102,8 @@ function Notification() {
 
   const handleDelete = async (_id: string) => {
     try {
-      await axios.delete(
-        `http://localhost:3000/api/notifications/delete/${_id}`
+      await api.delete(
+        `/notifications/delete/${_id}`
       );
       setNotifications((prevNotifications) =>
         prevNotifications.filter((n) => n._id !== _id)
