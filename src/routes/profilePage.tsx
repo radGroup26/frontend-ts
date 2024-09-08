@@ -125,12 +125,12 @@ const ProfilePage: React.FC = () => {
   const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!profile || !validateProfile(profile)) return;
-    
+    if (!profile || !validateProfile(profile)) {
+      return;
+    }
     try {
       const updatedProfile = { ...profile, userId: userID };
-      const response = await api.put(`/profiles/update/${userID}`, updatedProfile);
-      
+      const response = await api.patch(`/profiles/update/${userID}`, updatedProfile);
       setProfile(newProfile);
       setNewProfile({
         _id: response.data._id,
