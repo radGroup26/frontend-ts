@@ -12,6 +12,7 @@ import Login from './routes/login';
 import ProtectedRoute from './components/ProtectedRoute';
 import GuestRoute from './components/GuestRoute';
 import Dashboard from './routes/dashboard';
+import ProfilePage from './routes/profilePage';
 import Notification from "@/routes/notification.tsx";
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -36,6 +37,10 @@ const router = createBrowserRouter([
       {
         path: "notification",
         element: <ProtectedRoute element={<Notification />} />,
+      },
+      {
+        path: "account",
+        element: <ProtectedRoute element={<ProfilePage />} />,
       },
       {
         path: "menu",
