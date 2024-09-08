@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
 import moment from "moment";
+import { useAuth } from "@/context/AuthContext"; // Adjust path as necessary
 
 interface Notification {
   _id: string;
@@ -24,11 +25,13 @@ interface Notification {
 function Notification() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [editMode, setEditMode] = useState(false); // For toggling between create and edit mode
+  const [editMode, setEditMode] = useState(false);
   const [currentNotification, setCurrentNotification] =
-    useState<Notification | null>(null); // To hold the notification being edited
+    useState<Notification | null>(null);
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
+
+  const { role } = useAuth(); // Get the user role from the context
 
   useEffect(() => {
     fetchNotifications();
@@ -39,7 +42,6 @@ function Notification() {
       const response = await axios.get(
         "http://localhost:3000/api/notification/"
       );
-      console.log(response.data);
       setNotifications(response.data);
     } catch (error) {
       console.error("Error fetching notifications:", error);
@@ -53,7 +55,6 @@ function Notification() {
       const now = new Date().toISOString();
 
       if (editMode && currentNotification) {
-        // If in edit mode, update the notification
         const updatedNotification = {
           ...currentNotification,
           title,
@@ -71,7 +72,6 @@ function Notification() {
           )
         );
       } else {
-        // Otherwise, create a new notification
         const response = await axios.post(
           "http://localhost:3000/api/notification/add",
           {
@@ -90,15 +90,14 @@ function Notification() {
       setTitle("");
       setMessage("");
       setShowForm(false);
-      setEditMode(false); // Reset mode to create
-      setCurrentNotification(null); // Reset current notification
+      setEditMode(false);
+      setCurrentNotification(null);
     } catch (error) {
       console.error("Error creating/updating notification:", error);
     }
   };
 
   const handleDelete = async (_id: string) => {
-    console.log("Deleting notification with id:", _id);
     try {
       await axios.delete(
         `http://localhost:3000/api/notification/delete/${_id}`
@@ -126,17 +125,20 @@ function Notification() {
           Notification <BellRing className="ml-5" />
         </h2>
 
-        <Button
-          onClick={() => {
-            setShowForm(true);
-            setEditMode(false); // Set to create mode
-            setTitle("");
-            setMessage("");
-          }}
-          className="absolute top-5 right-5"
-        >
-          + Create New Notification
-        </Button>
+        {/* Show create button only for the owner */}
+        {role === "owner" && (
+          <Button
+            onClick={() => {
+              setShowForm(true);
+              setEditMode(false);
+              setTitle("");
+              setMessage("");
+            }}
+            className="absolute top-5 right-5"
+          >
+            + Create New Notification
+          </Button>
+        )}
 
         <div className="mt-10">
           <div className="flex flex-col gap-4">
@@ -150,27 +152,32 @@ function Notification() {
                     <CardTitle>{notification.title}</CardTitle>
                     <CardDescription>
                       {moment(notification.createdAt).fromNow()}
-                      {/* {notification.createdAt} */}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p>{notification.message}</p>
                   </CardContent>
                   <CardFooter className="py-2 space-x-5">
-                    <Button
-                      variant="outline"
-                      onClick={() => handleEdit(notification)}
-                    >
-                      Edit
-                    </Button>
-                    <Button onClick={() => handleDelete(notification._id)}>
-                      Delete
-                    </Button>
+                    {/* Show edit and delete buttons only for the owner */}
+                    {role === "owner" && (
+                      <>
+                        <Button
+                          variant="outline"
+                          onClick={() => handleEdit(notification)}
+                        >
+                          Edit
+                        </Button>
+                        <Button onClick={() => handleDelete(notification._id)}>
+                          Delete
+                        </Button>
+                      </>
+                    )}
                   </CardFooter>
                 </Card>
               ))}
           </div>
         </div>
+
         {/* Create & Edit Form */}
         {showForm && (
           <Card className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-80">
