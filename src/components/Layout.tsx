@@ -5,7 +5,8 @@ import {
     SquareUser,
     UserCog,
     Logs,
-    Utensils
+    Utensils,
+    Bell
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ import ManageTeamDialog from "./ManageTeamDialog";
 import Nav from "./Nav";
 import Switcher from "./Switcher";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
+import { Link } from 'react-router-dom'
 
 
 const navItems1 = [
@@ -32,6 +34,7 @@ const navItems1 = [
 ];
 
 const navItems2 = [
+    { icon: Bell, ariaLabel: "Notification", tooltip: "Notification", route: "/notifications" },
     { icon: LifeBuoy, ariaLabel: "Help", tooltip: "Help", route: "/help" },
     { icon: SquareUser, ariaLabel: "Account", tooltip: "Account", route: "/account" },
 ];
@@ -148,25 +151,27 @@ export default function Layout({ children }: { children: JSX.Element }) {
                 <Nav navItems={navItems1} />
 
                 <div className="mt-auto">
+                    <Nav navItems={navItems2} />
                     <TooltipProvider>
                         <nav className="grid gap-1 p-2">
-                            {navItems2.map((item, index) => (
-                                <Tooltip key={index}>
-                                    <TooltipTrigger asChild>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className={cn('rounded-lg')}
-                                            aria-label={item.ariaLabel}
-                                        >
-                                            <item.icon className="size-5" />
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="right" sideOffset={5}>
-                                        {item.tooltip}
-                                    </TooltipContent>
-                                </Tooltip>
-                            ))}
+                            {/*{navItems2.map((item, index) => (*/}
+                            {/*    <Tooltip key={index}>*/}
+                            {/*        <TooltipTrigger asChild>*/}
+                            {/*            <Link to={item.route}>*/}
+                            {/*            <Button*/}
+                            {/*                variant="ghost"*/}
+                            {/*                size="icon"*/}
+                            {/*                className={cn('rounded-lg')}*/}
+                            {/*                aria-label={item.ariaLabel}*/}
+                            {/*            >*/}
+                            {/*                <item.icon className="size-5" />*/}
+                            {/*            </Button></Link>*/}
+                            {/*        </TooltipTrigger>*/}
+                            {/*        <TooltipContent side="right" sideOffset={5}>*/}
+                            {/*            {item.tooltip}*/}
+                            {/*        </TooltipContent>*/}
+                            {/*    </Tooltip>*/}
+                            {/*))}*/}
 
                             <Tooltip>
                                 <TooltipTrigger asChild>
