@@ -22,23 +22,62 @@ import { Label } from "@/components/ui/label.tsx";
 const ProfilePage: React.FC = () => {
   const { user: authUser } = useAuth();
   const userID = authUser?.userId;
-  const [profile, setProfile] = useState<Profile | null>(null);
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await api.get(`/profiles/${userID}`);
-        setProfile(response.data);
-      } catch (error) {
-        console.error("Error fetching profile:", error);
-        setProfile(null);
-      }
-    };
-
-    fetchProfile();
-  }, [onload]);
+  const [profile, setProfile] = useState<Profile>({ _id: '', first_name: '', last_name: '', role: '', email: '', userId: userID });
+  const [isLoading, setIsLoading] = useState(true);
+  const [newProfile, setNewProfile] = useState<Profile>({
+    _id: '',
+    first_name: '',
+    last_name: '',
+    role: '',
+    email: '',
+    userId: ''
+  });
 
   const { toast } = useToast();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 5000);
+  
+    return () => clearTimeout(timer);
+  }, []);
+
+  const fetchProfile = async () => {
+    try {
+      const response = await api.get(`/profiles/${userID}`);
+      if (response.status === 200 && (response.data)) {
+        setProfile(response.data);
+        setNewProfile({
+          _id: response.data._id,
+          first_name: response.data.first_name,
+          last_name: response.data.last_name,
+          role: response.data.role,
+          email: response.data.email,
+          userId: userID
+        });
+        toast({
+          title: "Profile Fetched",
+          description: "Your profile has been successfully fetched.",
+        });
+      } else {
+        throw new Error("Failed to fetch profile");
+      }
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      setProfile(null);
+      toast({
+        title: "Error Fetching Profile",
+        description: "An error occurred while fetching your profile.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
   const validateProfile = (profile: Profile) => {
     if (!profile.first_name || !profile.last_name || !profile.role) {
@@ -49,37 +88,72 @@ const ProfilePage: React.FC = () => {
       return false;
     }
     return true;
-  }
+  };
 
   const handleCreateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
+    
+    if (!validateProfile(newProfile)) return;
+
+    try {
+      const updatedProfile = { ...newProfile, userId: userID };
+      const response = await api.post('/profiles/create', updatedProfile);
+      setProfile(newProfile);
+      setNewProfile({
+        _id: response.data._id,
+        first_name: response.data.first_name,
+        last_name: response.data.last_name,
+        role: response.data.role,
+        email: response.data.email,
+        userId: userID
+      });
+      
+      toast({
+        title: "Profile created successfully",
+        description: "Your profile has been created.",
+      });
+    } catch (error) {
+      console.error('Error creating profile:', error);
+      toast({
+        title: "Error Creating Profile",
+        description: "An error occurred while creating your profile. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
     if (!profile || !validateProfile(profile)) return;
     
     try {
       const updatedProfile = { ...profile, userId: userID };
-      await api.post('/profiles/create', updatedProfile);
-      toast({
-        title: "Profile created successfully",
+      const response = await api.put(`/profiles/update/${userID}`, updatedProfile);
+      
+      setProfile(newProfile);
+      setNewProfile({
+        _id: response.data._id,
+        first_name: response.data.first_name,
+        last_name: response.data.last_name,
+        role: response.data.role,
+        email: response.data.email,
+        userId: userID
       });
-    } catch (error) {
-      console.error('Error creating profile:', error);
-    }
-  }
-
-  const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    if (!profile || !validateProfile(profile)) return;
-    
-    try {
-        const updatedProfile = { ...profile, userId: userID };
-      await api.put(`/profiles/update`, updatedProfile);
+      
       toast({
         title: "Profile Updated",
+        description: "Your profile has been successfully updated."
       });
     } catch (error) {
       console.error('Error editing profile:', error);
+      toast({
+        title: "Error Updating Profile",
+        description: "An error occurred while updating your profile. Please try again.",
+        variant: "destructive"
+      });
     }
-  }
+  };
 
   const handleDeleteProfile = async () => {
     if (!profile) {
@@ -91,17 +165,33 @@ const ProfilePage: React.FC = () => {
     }
 
     try {
-      await api.delete(`/profiles/delete`);
+      await api.delete(`/profiles/delete/${userID}`);
+      
+      setNewProfile({
+        _id: '',
+        first_name: '',
+        last_name: '',
+        role: '',
+        email: '',
+        userId: ''
+      });
+      setProfile(newProfile);
+
       toast({
         title: "Profile Deleted",
+        description: "Your profile has been successfully deleted."
       });
-      setProfile(null);
     } catch (error) {
       console.error('Error deleting Profile:', error);
+      toast({
+        title: "Error Deleting Profile",
+        description: "An error occurred while deleting your profile. Please try again.",
+        variant: "destructive"
+      });
     }
-  }
+  };
 
-  let createProfileContent = (
+  const createProfileContent = (
     <Dialog>
       <DialogTrigger asChild>
         <Button variant="outline">Create Profile</Button>
@@ -119,9 +209,9 @@ const ProfilePage: React.FC = () => {
               First Name
             </Label>
             <Input id="first_name"
-                   value={profile?.first_name || ''}
-                   className="col-span-3"
-                   onChange={(e) => setProfile({...profile!, first_name: e.target.value})}
+              value={newProfile.first_name}
+              className="col-span-3"
+              onChange={(e) => setNewProfile({...newProfile!, first_name: e.target.value})}
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -129,9 +219,9 @@ const ProfilePage: React.FC = () => {
               Last Name
             </Label>
             <Input id="last_name"
-                   value={profile?.last_name || ''}
-                   className="col-span-3"
-                   onChange={(e) => setProfile({...profile!, last_name: e.target.value})}
+              value={newProfile.last_name}
+              className="col-span-3"
+              onChange={(e) => setNewProfile({...newProfile!, last_name: e.target.value})}
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -139,9 +229,9 @@ const ProfilePage: React.FC = () => {
               Role
             </Label>
             <Input id="Role"
-                   value={profile?.role || ''}
-                   className="col-span-3"
-                   onChange={(e) => setProfile({...profile!, role: e.target.value})}
+              value={newProfile.role}
+              className="col-span-3"
+              onChange={(e) => setNewProfile({...newProfile!, role: e.target.value})}
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -149,9 +239,9 @@ const ProfilePage: React.FC = () => {
               Email
             </Label>
             <Input id="email"
-                   value={profile?.email || ''}
-                   className="col-span-3"
-                   onChange={(e) => setProfile({...profile!, email: e.target.value})}
+              value={newProfile.email}
+              className="col-span-3"
+              onChange={(e) => setNewProfile({...newProfile!, email: e.target.value})}
             />
           </div>
           <DialogFooter>
@@ -160,9 +250,9 @@ const ProfilePage: React.FC = () => {
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 
-  let updateProfileContent = (
+  const updateProfileContent = (
     <Dialog>
       <DialogTrigger asChild>
         <Button variant="outline">Update Profile</Button>
@@ -180,9 +270,9 @@ const ProfilePage: React.FC = () => {
               First Name
             </Label>
             <Input id="first_name"
-                   value={profile?.first_name || ''}
-                   className="col-span-3"
-                   onChange={(e) => setProfile({...profile!, first_name: e.target.value})}
+              value={profile?.first_name || ''}
+              className="col-span-3"
+              onChange={(e) => setProfile({...profile!, first_name: e.target.value})}
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -190,9 +280,9 @@ const ProfilePage: React.FC = () => {
               Last Name
             </Label>
             <Input id="last_name"
-                   value={profile?.last_name || ''}
-                   className="col-span-3"
-                   onChange={(e) => setProfile({...profile!, last_name: e.target.value})}
+              value={profile?.last_name || ''}
+              className="col-span-3"
+              onChange={(e) => setProfile({...profile!, last_name: e.target.value})}
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -200,9 +290,9 @@ const ProfilePage: React.FC = () => {
               Role
             </Label>
             <Input id="Role"
-                   value={profile?.role || ''}
-                   className="col-span-3"
-                   onChange={(e) => setProfile({...profile!, role: e.target.value})}
+              value={profile?.role || ''}
+              className="col-span-3"
+              onChange={(e) => setProfile({...profile!, role: e.target.value})}
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -210,9 +300,9 @@ const ProfilePage: React.FC = () => {
               Email
             </Label>
             <Input id="email"
-                   value={profile?.email || ''}
-                   className="col-span-3"
-                   onChange={(e) => setProfile({...profile!, email: e.target.value})}
+              value={profile?.email || ''}
+              className="col-span-3"
+              onChange={(e) => setProfile({...profile!, email: e.target.value})}
             />
           </div>
           <DialogFooter>
@@ -221,9 +311,9 @@ const ProfilePage: React.FC = () => {
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 
-  let deleteProfileContent = (
+  const deleteProfileContent = (
     <Dialog>
       <DialogTrigger asChild>
         <Button variant="outline">Delete Profile</Button>
@@ -241,12 +331,8 @@ const ProfilePage: React.FC = () => {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
-
-  if (!profile) {
-    return <div>Loading...</div>;
-  }
-
+  );
+  if (isLoading) return <div>Loading...</div>;
   return (
     <div>
       <Card className="w-full max-w-md mx-auto">
@@ -255,19 +341,19 @@ const ProfilePage: React.FC = () => {
             <CircleUserRound className={"w-10 p-0 m-0"}/>
           </div>
           <div>
-            <CardTitle className="text-2xl font-bold">{profile.first_name} {profile.last_name}</CardTitle>
-            <Badge variant="secondary" className="mt-1">{profile.role}</Badge>
+            <CardTitle className="text-2xl font-bold">{profile?.first_name || ""} {profile?.last_name || ""}</CardTitle>
+            <Badge variant="secondary" className="mt-1">{profile?.role || ""}</Badge>
           </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div>
               <h3 className="text-sm font-medium text-muted-foreground">Email</h3>
-              <p className="text-sm">{profile.email}</p>
+              <p className="text-sm">{profile?.email || ""}</p>
             </div>
             <div>
               <h3 className="text-sm font-medium text-muted-foreground">Role</h3>
-              <p className="text-sm capitalize">{profile.role}</p>
+              <p className="text-sm capitalize">{profile?.role || ""}</p>
             </div>
           </div>
         </CardContent>
