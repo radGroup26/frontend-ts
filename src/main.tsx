@@ -6,13 +6,6 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import { AuthProvider } from "@/context/AuthContext";
 
-import Root from "./routes/root";
-import Register from "./routes/register";
-import Login from "./routes/login";
-import ProtectedRoute from "./components/ProtectedRoute";
-import GuestRoute from "./components/GuestRoute";
-import Dashboard from "./routes/dashboard";
-
 import Root from './routes/root'
 import Register from './routes/register'
 import Login from './routes/login';
