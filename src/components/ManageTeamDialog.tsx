@@ -59,8 +59,10 @@ export default function ManageTeamDialog() {
                 })
                 .catch((error) => {
                     console.log(error);
-                    setInviteError("Failed to invite member. Please try again.");
+                    const errorMessage = error.response?.data?.message || "Failed to invite member. Please try again.";
+                    setInviteError(errorMessage);
                 })
+
         },
     })
 
@@ -72,6 +74,18 @@ export default function ManageTeamDialog() {
         return <div>Loading...</div>
     }
 
+
+    function handleRemoveMember(userId: string) {
+        api.post('/teams/memberRemove/', { teamId: selectedRestaurant?._id, userId }, { withCredentials: true })
+            .then((response) => {
+                console.log(response);
+                members.refetch();
+            })
+            .catch((error) => {
+                console.log(error);
+            })
+
+    }
 
     return (
         <Dialog>
@@ -128,6 +142,7 @@ export default function ManageTeamDialog() {
                                                 value={inviteMemberForm.values.username}
                                                 onChange={inviteMemberForm.handleChange}
                                                 placeholder="Email"
+                                                autoCapitalize="none"
                                             />
                                             <Select
                                                 value={inviteMemberForm.values.role}
@@ -162,17 +177,23 @@ export default function ManageTeamDialog() {
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
-                                            <TableHead className="w-[100px]">ID</TableHead>
+                                            {/* <TableHead className="w-[100px]">ID</TableHead> */}
+                                            <TableHead>Username</TableHead>
                                             <TableHead>Role</TableHead>
                                             <TableHead>Invite</TableHead>
+                                            <TableHead></TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {members.data?.map((member) => (
                                             <TableRow key={member._id}>
-                                                <TableCell className="font-medium">{member.user}</TableCell>
+                                                {/* <TableCell className="font-medium">{member.user}</TableCell> */}
+                                                <TableCell className="font-medium">{member.username}</TableCell>
                                                 <TableCell>{member.role}</TableCell>
                                                 <TableCell>{member.accepted ? 'Accepted' : 'Pending'}</TableCell>
+                                                <TableCell className="text-right">
+                                                    <Button variant="destructive" onClick={() => handleRemoveMember(member.user)}>Remove</Button>
+                                                </TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>

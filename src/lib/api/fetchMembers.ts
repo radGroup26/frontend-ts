@@ -10,5 +10,6 @@ export default async function fetchMembers({ queryKey }: any) {
     }
 
     const members: Member[] = response.data.members;
+    
     return members;
 }

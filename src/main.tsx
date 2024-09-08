@@ -1,14 +1,10 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./index.css";
 
-import {
-  createBrowserRouter,
-  RouterProvider,
-} from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-import { AuthProvider } from '@/context/AuthContext';
-
+import { AuthProvider } from "@/context/AuthContext";
 
 import Root from './routes/root'
 import Register from './routes/register'
@@ -32,11 +28,14 @@ const router = createBrowserRouter([
       {
         path: "dashboard",
         element: <ProtectedRoute element={<Dashboard />} />,
-
       },
       {
         path: "invites",
-        element: <ProtectedRoute element={<Invites/>} />,
+        element: <ProtectedRoute element={<Invites />} />,
+      },
+      {
+        path: "notification",
+        element: <ProtectedRoute element={<Notification />} />,
       },
       {
         path: "account",
@@ -49,6 +48,10 @@ const router = createBrowserRouter([
       {
         path: "tables",
         element: <ProtectedRoute element={<Tables/>} />,
+      },
+      {
+        path: "notifications",
+        element: <ProtectedRoute element={<Notification/>} />,
       }
     ]
   },
@@ -60,13 +63,12 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <GuestRoute element={<Login />} />,
-  }
+  },
 ]);
 
+const queryClient = new QueryClient({});
 
-const queryClient = new QueryClient({})
-
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -74,5 +76,5 @@ createRoot(document.getElementById('root')!).render(
       </AuthProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
-  </StrictMode >,
-)
+  </StrictMode>
+);
