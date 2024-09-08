@@ -40,7 +40,7 @@ function Notification() {
   const fetchNotifications = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/api/notification/"
+        "http://localhost:3000/api/notifications/"
       );
       setNotifications(response.data);
     } catch (error) {
@@ -62,7 +62,7 @@ function Notification() {
           createdAt: now,
         };
         const response = await axios.put(
-          `http://localhost:3000/api/notification/save/${currentNotification._id}`,
+          `http://localhost:3000/api/notifications/save/${currentNotification._id}`,
           updatedNotification
         );
 
@@ -73,7 +73,7 @@ function Notification() {
         );
       } else {
         const response = await axios.post(
-          "http://localhost:3000/api/notification/add",
+          "http://localhost:3000/api/notifications/add",
           {
             title,
             message,
@@ -100,7 +100,7 @@ function Notification() {
   const handleDelete = async (_id: string) => {
     try {
       await axios.delete(
-        `http://localhost:3000/api/notification/delete/${_id}`
+        `http://localhost:3000/api/notifications/delete/${_id}`
       );
       setNotifications((prevNotifications) =>
         prevNotifications.filter((n) => n._id !== _id)
