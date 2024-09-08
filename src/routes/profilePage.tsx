@@ -36,7 +36,7 @@ const ProfilePage: React.FC = () => {
     };
 
     fetchProfile();
-  }, [userID]);
+  }, [onload]);
 
   const { toast } = useToast();
 
@@ -56,7 +56,8 @@ const ProfilePage: React.FC = () => {
     if (!profile || !validateProfile(profile)) return;
     
     try {
-      await api.post('/profiles/create', profile);
+      const updatedProfile = { ...profile, userId: userID };
+      await api.post('/profiles/create', updatedProfile);
       toast({
         title: "Profile created successfully",
       });
@@ -70,7 +71,8 @@ const ProfilePage: React.FC = () => {
     if (!profile || !validateProfile(profile)) return;
     
     try {
-      await api.put(`/profiles/${profile._id}`, profile);
+        const updatedProfile = { ...profile, userId: userID };
+      await api.put(`/profiles/update`, updatedProfile);
       toast({
         title: "Profile Updated",
       });
@@ -89,7 +91,7 @@ const ProfilePage: React.FC = () => {
     }
 
     try {
-      await api.delete(`/profiles/${profile.userId}`);
+      await api.delete(`/profiles/delete`);
       toast({
         title: "Profile Deleted",
       });
