@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { BellRing } from "lucide-react";
 import {
   Card,
@@ -8,6 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -32,6 +34,7 @@ function Notification() {
   const [message, setMessage] = useState("");
 
   const { role } = useAuth(); // Get the user role from the context
+
 
   useEffect(() => {
     fetchNotifications();
@@ -177,7 +180,7 @@ function Notification() {
               ))}
           </div>
         </div>
-
+        
         {/* Create & Edit Form */}
         {showForm && (
           <Card className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-80">
