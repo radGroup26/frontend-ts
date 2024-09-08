@@ -14,16 +14,13 @@ import { useAuth } from "@/context/AuthContext";
 import api from "@/lib/api/api";
 import fetchRestaurants from "@/lib/api/fetchRestaurants";
 import { cn } from "@/lib/utils";
-import { Member } from "@/types/member";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import CreateRestaurantDialog from "./CreateRestaurantDialog";
 import Logo from "./Logo";
 import ManageTeamDialog from "./ManageTeamDialog";
 import Nav from "./Nav";
 import Switcher from "./Switcher";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
-import { Link } from 'react-router-dom';
 
 
 const navItems1 = [
