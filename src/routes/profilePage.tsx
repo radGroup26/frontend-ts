@@ -1,17 +1,35 @@
-import React, { useEffect, useState } from 'react';
-/* import ProfileCard from '../components/ProfileCard'; */ 
+import React, { useEffect, useState } from 'react'; 
 import { useAuth } from '@/context/AuthContext';
 import api from "@/lib/api/api.ts";
 import { Profile } from '@/types/profile';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-//import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { CircleUserRound } from 'lucide-react';
+import { Input } from "@/components/ui/input.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter
+} from "@/components/ui/dialog"
+import {Button} from "@/components/ui/button.tsx";
+import { Label } from "@/components/ui/label.tsx";
 
 const ProfilePage: React.FC = () => {
-  const [profile, setProfile] = useState<Profile[]>([]);
   const { user: authUser } = useAuth();
   const userID = authUser?.userId;
+  const [profile, setProfile] = useState<Profile>({
+    _id: "",
+    first_name: "",
+    last_name: "",
+    role: "",
+    email: "",
+    userId: userID
+  });
   const [newProfile, setNewProfile] = useState<Profile>({
     _id: "",
     first_name: "",
@@ -38,7 +56,7 @@ const ProfilePage: React.FC = () => {
   });
 
   useEffect(() => {
-    api.get(`/profiles/?userId=${userID}`)
+    api.get(`/profiles/${userID}`)
         .then(response => {
             setProfile(response.data);
         })
@@ -125,15 +143,153 @@ const handleDeleteProfile = (e) => {
       });
 }
 
+let createProfileContent = (
+  <Dialog>
+      <DialogTrigger asChild>
+          <Button variant="outline">Create Profile</Button>
+      </DialogTrigger>
+      <DialogContent>
+          <DialogHeader>
+              <DialogTitle>Create</DialogTitle>
+              <DialogDescription>
+                  Create Profile
+              </DialogDescription>
+          </DialogHeader>
+              <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="first_name" className="text-right">
+                      First Name
+                  </Label>
+                  <Input id="first_name"
+                         value={' '}
+                         className="col-span-3"
+                         onChange={(e) => setNewProfile({...newProfile, first_name: e.target.value})}
+                  />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="last_name" className="text-right">
+                      Last Name
+                  </Label>
+                  <Input id="last_name"
+                         value={' '}
+                         className="col-span-3"
+                         onChange={(e) => setNewProfile({...newProfile, last_name: e.target.value})}
+                  />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="role" className="text-right">
+                      Role
+                  </Label>
+                  <Input id="Role"
+                         value={' '}
+                         className="col-span-3"
+                         onChange={(e) => setNewProfile({...newProfile, role: e.target.value})}
+                  />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="email" className="text-right">
+                      Email
+                  </Label>
+                  <Input id="email"
+                         value={' '}
+                         className="col-span-3"
+                         onChange={(e) => setNewProfile({...newProfile, email: e.target.value})}
+                  />
+              </div>
+          <DialogFooter>
+              <Button onClick={handleCreateProfile}>Create</Button>
+          </DialogFooter>
+      </DialogContent>
+  </Dialog>
+)
+
+let updateProfileContent = (
+  <Dialog>
+      <DialogTrigger asChild>
+          <Button variant="outline">Update Profile</Button>
+      </DialogTrigger>
+      <DialogContent>
+          <DialogHeader>
+              <DialogTitle>Update</DialogTitle>
+              <DialogDescription>
+                  Update Profile
+              </DialogDescription>
+          </DialogHeader>
+              <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="first_name" className="text-right">
+                      First Name
+                  </Label>
+                  <Input id="first_name"
+                         value={updateProfile.first_name || ' '}
+                         className="col-span-3"
+                         onChange={(e) => setUpdateProfile({...updateProfile, first_name: e.target.value})}
+                  />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="last_name" className="text-right">
+                      Last Name
+                  </Label>
+                  <Input id="last_name"
+                         value={updateProfile.last_name || ' '}
+                         className="col-span-3"
+                         onChange={(e) => setUpdateProfile({...updateProfile, last_name: e.target.value})}
+                  />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="role" className="text-right">
+                      Role
+                  </Label>
+                  <Input id="Role"
+                         value={updateProfile.role || ' '}
+                         className="col-span-3"
+                         onChange={(e) => setUpdateProfile({...updateProfile, role: e.target.value})}
+                  />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="email" className="text-right">
+                      Email
+                  </Label>
+                  <Input id="email"
+                         value={updateProfile.email || ' '}
+                         className="col-span-3"
+                         onChange={(e) => setUpdateProfile({...updateProfile, email: e.target.value})}
+                  />
+              </div>
+          <DialogFooter>
+              <Button onClick={handleUpdateProfile}>Update</Button>
+          </DialogFooter>
+      </DialogContent>
+  </Dialog>
+)
+
+let deleteProfileContent = (
+  <Dialog>
+    <DialogTrigger asChild>
+          <Button variant="outline">Delete Profile</Button>
+      </DialogTrigger>
+      <DialogContent>
+          <DialogHeader>
+              <DialogTitle>Delete</DialogTitle>
+              <DialogDescription>
+                  All of your profile data will be permenantly deleted.
+                  Do you wish to continue?
+              </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+              <Button onClick={handleDeleteProfile}><span className='red'>Delete</span></Button>
+          </DialogFooter>
+        </DialogContent>
+  </Dialog>
+)
+
   return (
+    <div>
     <Card className="w-full max-w-md mx-auto">
       <CardHeader className="flex flex-row items-center gap-4">
-        {/* <Avatar className="w-16 h-16">
-          <AvatarImage src={`https://api.dicebear.com/6.x/initials/svg?seed=${user.name}`} alt={user.name} />
-          <AvatarFallback><User className="w-8 h-8" /></AvatarFallback>
-        </Avatar> */}
         <div>
-          <CardTitle className="text-2xl font-bold">{profile.first_name}</CardTitle>
+          <CircleUserRound className={"w-10 p-0 m-0"}/>
+        </div>
+        <div>
+          <CardTitle className="text-2xl font-bold">{profile.first_name} {profile.last_name}</CardTitle>
           <Badge variant="secondary" className="mt-1">{profile.role}</Badge>
         </div>
       </CardHeader>
@@ -150,13 +306,10 @@ const handleDeleteProfile = (e) => {
         </div>
       </CardContent>
     </Card>
-  );
- /*  return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6 text-center">Profile Page</h1>
-      <ProfileCard profile={profile} />
+    <center>{createProfileContent} {updateProfileContent}</center>
+    <center>{deleteProfileContent}</center>
     </div>
-  ); */
+  );
 };
 
 export default ProfilePage;
