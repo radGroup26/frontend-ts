@@ -209,7 +209,7 @@ export default function Layout({ children }: { children: JSX.Element }) {
 
             </header>
 
-            <main className="px-4 pt-2">
+            <main className="px-4 pt-2 max-h-screen overflow-x-auto">
 
                 {children}
 
