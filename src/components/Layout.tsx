@@ -200,13 +200,13 @@ export default function Layout({ children }: { children: JSX.Element }) {
                 <CreateRestaurantDialog />
                 <ManageTeamDialog />
 
-            <div>{role}</div>
+            {/* <div>{role}</div>
             <div>username {user?.username}</div>
-            <div>userId {user?.userId}</div>
+            <div>userId {user?.userId}</div> */}
 
             </header>
 
-            <main className="px-4 pt-2">
+            <main className="px-4 pt-2 max-h-screen overflow-x-auto">
 
                 {children}
 
