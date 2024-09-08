@@ -3,7 +3,9 @@ import {
     LifeBuoy,
     LogOut,
     SquareUser,
-    UserCog
+    UserCog,
+    Logs,
+    Utensils
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -25,7 +27,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/t
 const navItems1 = [
     { icon: LayoutDashboard, ariaLabel: "Dashboard", tooltip: "Dashboard", route: "/dashboard" },
     { icon: UserCog, ariaLabel: "Invites", tooltip: "Invites", route: "/invites" },
-
+    { icon: Logs, ariaLabel: "Menu", tooltip: "Menu Items", route: "/menu" },
+    { icon: Utensils, ariaLabel: "Tables", tooltip: "Tables", route: "/tables" },
 ];
 
 const navItems2 = [
@@ -34,7 +37,7 @@ const navItems2 = [
 ];
 
 export default function Layout({ children }: { children: JSX.Element }) {
-    const { logout, role } = useAuth();
+    const { logout, role, user } = useAuth();
 
 
     const restaurants = useQuery({
@@ -196,6 +199,8 @@ export default function Layout({ children }: { children: JSX.Element }) {
                 <ManageTeamDialog />
 
             <div>{role}</div>
+            <div>username {user?.username}</div>
+            <div>userId {user?.userId}</div>
 
             </header>
 
