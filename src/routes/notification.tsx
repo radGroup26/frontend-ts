@@ -39,9 +39,7 @@ function Notification() {
 
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:3000/api/notifications/"
-      );
+      const response = await axios.get("http://localhost:3000/notifications/");
       setNotifications(response.data);
     } catch (error) {
       console.error("Error fetching notifications:", error);
@@ -62,7 +60,7 @@ function Notification() {
           createdAt: now,
         };
         const response = await axios.put(
-          `http://localhost:3000/api/notifications/save/${currentNotification._id}`,
+          `http://localhost:3000/notifications/save/${currentNotification._id}`,
           updatedNotification
         );
 
@@ -73,7 +71,7 @@ function Notification() {
         );
       } else {
         const response = await axios.post(
-          "http://localhost:3000/api/notifications/add",
+          "http://localhost:3000/notifications/add",
           {
             title,
             message,
@@ -99,9 +97,7 @@ function Notification() {
 
   const handleDelete = async (_id: string) => {
     try {
-      await axios.delete(
-        `http://localhost:3000/api/notifications/delete/${_id}`
-      );
+      await axios.delete(`http://localhost:3000/notifications/delete/${_id}`);
       setNotifications((prevNotifications) =>
         prevNotifications.filter((n) => n._id !== _id)
       );
