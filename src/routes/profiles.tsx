@@ -1,83 +1,83 @@
-import {
-    Table,
-    TableBody,
-    TableCaption,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table"
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-    DialogFooter
-} from "@/components/ui/dialog"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
-import { Input } from "@/components/ui/input.tsx";
-import { Label } from "@/components/ui/label.tsx";
-import React, {useEffect, useState} from "react";
-import {Item} from "@/types/Item.tsx";
-import {useAuth} from "@/context/AuthContext.tsx";
-import api from "@/lib/api/api.ts";
-import {Button} from "@/components/ui/button.tsx";
-import { useToast } from "@/hooks/use-toast";
-import { Toaster } from "@/components/ui/toaster";
-import {CircleUserRound, Pencil, Trash2} from 'lucide-react';
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card.tsx";
-import {Badge} from "@/components/ui/badge.tsx";
-
-
-export default function Profiles() {
-    const { selectedRestaurant, role } = useAuth();
-    const [table, setTables] = useState<Table[]>([]);
-    const [newTable, setNewTable] = useState<Table>({
-        restaurantId: selectedRestaurant?._id,
-    });
-    const [editTable, setEditTable] = useState<Table>({
-        restaurantId: selectedRestaurant?._id,
-    });
-    const [deleteTable, setDeleteTable] = useState<Table>({
-        restaurantId: selectedRestaurant?._id,
-    });
-    const { toast } = useToast();
-
-    useEffect(() => {
-        api.get(`/tables/${selectedRestaurant?._id}`)
-            .then(response => {
-                setTables(response.data);
-            })
-            .catch(error => {
-                console.error("Error fetching order types:", error);
-            });
-    }, [newTable, editTable, deleteTable]);
-
-    const validateTable = (table) => {
-        if (!table.no) {
-            toast({
-                title: "Invalid No",
-                description: "Please enter a valid no for table."
-            });
-            return false;
-        } else if (!table.seats) {
-            toast({
-                title: "Invalid Seats",
-                description: "Please enter a valid seats no for table."
-            });
-            return false;
-        } else {
-            return true;
-        }
-    }
+// import {
+//     Table,
+//     TableBody,
+//     TableCaption,
+//     TableCell,
+//     TableHead,
+//     TableHeader,
+//     TableRow,
+// } from "@/components/ui/table"
+// import {
+//     Dialog,
+//     DialogContent,
+//     DialogDescription,
+//     DialogHeader,
+//     DialogTitle,
+//     DialogTrigger,
+//     DialogFooter
+// } from "@/components/ui/dialog"
+// import {
+//     Select,
+//     SelectContent,
+//     SelectItem,
+//     SelectTrigger,
+//     SelectValue,
+// } from "@/components/ui/select"
+// import { Input } from "@/components/ui/input.tsx";
+// import { Label } from "@/components/ui/label.tsx";
+// import React, {useEffect, useState} from "react";
+// import {Item} from "@/types/Item.tsx";
+// import {useAuth} from "@/context/AuthContext.tsx";
+// import api from "@/lib/api/api.ts";
+// import {Button} from "@/components/ui/button.tsx";
+// import { useToast } from "@/hooks/use-toast";
+// import { Toaster } from "@/components/ui/toaster";
+// import {CircleUserRound, Pencil, Trash2} from 'lucide-react';
+// import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card.tsx";
+// import {Badge} from "@/components/ui/badge.tsx";
+//
+//
+// export default function Profiles() {
+//     const { selectedRestaurant, role } = useAuth();
+//     const [table, setTables] = useState<Table[]>([]);
+//     const [newTable, setNewTable] = useState<Table>({
+//         restaurantId: selectedRestaurant?._id,
+//     });
+//     const [editTable, setEditTable] = useState<Table>({
+//         restaurantId: selectedRestaurant?._id,
+//     });
+//     const [deleteTable, setDeleteTable] = useState<Table>({
+//         restaurantId: selectedRestaurant?._id,
+//     });
+//     const { toast } = useToast();
+//
+//     useEffect(() => {
+//         api.get(`/tables/${selectedRestaurant?._id}`)
+//             .then(response => {
+//                 setTables(response.data);
+//             })
+//             .catch(error => {
+//                 console.error("Error fetching order types:", error);
+//             });
+//     }, [newTable, editTable, deleteTable]);
+//
+//     const validateTable = (table) => {
+//         if (!table.no) {
+//             toast({
+//                 title: "Invalid No",
+//                 description: "Please enter a valid no for table."
+//             });
+//             return false;
+//         } else if (!table.seats) {
+//             toast({
+//                 title: "Invalid Seats",
+//                 description: "Please enter a valid seats no for table."
+//             });
+//             return false;
+//         } else {
+//             return true;
+//         }
+//     }
 
     // const handleCreateTable = (e) => {
     //     e.preventDefault()
@@ -294,53 +294,53 @@ export default function Profiles() {
     //     </Dialog>
     // )
 
-    let content;
-    if (role === 'owner') {
-        content = (
-            <div className={"flex flex-col m-4 p-4"}>
-                <Toaster/>
-                <div className={"flex justify-end gap-3"}>
-                    {deleteTableContent}
-                    {editTableContent}
-                    {addTableContent}
-                </div>
-                <div className={"p-4"}>
-                    <Card className="w-full max-w-md mx-auto">
-                        <CardHeader className="flex flex-row items-center gap-4">
-                            <div>
-                                <CircleUserRound className={"w-10 p-0 m-0"}/>
-                            </div>
-                            <div>
-                                <CardTitle className="text-2xl font-bold">{profile.first_name} {profile.last_name}</CardTitle>
-                                <Badge variant="secondary" className="mt-1">{profile.role}</Badge>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
-                                <div>
-                                    <h3 className="text-sm font-medium text-muted-foreground">Email</h3>
-                                    <p className="text-sm">{profile.email}</p>
-                                </div>
-                                <div>
-                                    <h3 className="text-sm font-medium text-muted-foreground">Role</h3>
-                                    <p className="text-sm capitalize">{profile.role}</p>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
-        )
-    } else {
-        content = (
-            <div className={"flex flex-col justify-center items-center h-full"}>
-                <p className={"text-gray-200 text-8xl p-4 mt-40"}>ツ</p>
-                <p className={"text-gray-300 p-4"}>Content Restricted</p>
-            </div>
-        )
-    }
-
-    return (
-        <div>{content}</div>
-    );
-}
+//     let content;
+//     if (role === 'owner') {
+//         content = (
+//             <div className={"flex flex-col m-4 p-4"}>
+//                 <Toaster/>
+//                 <div className={"flex justify-end gap-3"}>
+//                     {deleteTableContent}
+//                     {editTableContent}
+//                     {addTableContent}
+//                 </div>
+//                 <div className={"p-4"}>
+//                     <Card className="w-full max-w-md mx-auto">
+//                         <CardHeader className="flex flex-row items-center gap-4">
+//                             <div>
+//                                 <CircleUserRound className={"w-10 p-0 m-0"}/>
+//                             </div>
+//                             <div>
+//                                 <CardTitle className="text-2xl font-bold">{profile.first_name} {profile.last_name}</CardTitle>
+//                                 <Badge variant="secondary" className="mt-1">{profile.role}</Badge>
+//                             </div>
+//                         </CardHeader>
+//                         <CardContent>
+//                             <div className="space-y-4">
+//                                 <div>
+//                                     <h3 className="text-sm font-medium text-muted-foreground">Email</h3>
+//                                     <p className="text-sm">{profile.email}</p>
+//                                 </div>
+//                                 <div>
+//                                     <h3 className="text-sm font-medium text-muted-foreground">Role</h3>
+//                                     <p className="text-sm capitalize">{profile.role}</p>
+//                                 </div>
+//                             </div>
+//                         </CardContent>
+//                     </Card>
+//                 </div>
+//             </div>
+//         )
+//     } else {
+//         content = (
+//             <div className={"flex flex-col justify-center items-center h-full"}>
+//                 <p className={"text-gray-200 text-8xl p-4 mt-40"}>ツ</p>
+//                 <p className={"text-gray-300 p-4"}>Content Restricted</p>
+//             </div>
+//         )
+//     }
+//
+//     return (
+//         <div>{content}</div>
+//     );
+// }

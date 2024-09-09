@@ -19,6 +19,8 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import Invites from './routes/invites';
 import Menu from "@/routes/menu.tsx";
 import Tables from "@/routes/tables.tsx";
+import Notification from "@/routes/notification.tsx";
+
 
 const router = createBrowserRouter([
   {
