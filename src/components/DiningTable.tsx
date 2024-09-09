@@ -34,7 +34,7 @@ export default function DiningTable({ tableId, tableNo, tableSeats }: DiningTabl
     // console.log(orders)
     // console.log(tableId)
 
-
+    // Run use effect every 10 seconds?
     useEffect(() => {
         // // Fetch orders from the backend
         api.get(`/orders/${tableId}`)

@@ -6,20 +6,13 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import { AuthProvider } from "@/context/AuthContext";
 
-import Root from "./routes/root";
-import Register from "./routes/register";
-import Login from "./routes/login";
-import ProtectedRoute from "./components/ProtectedRoute";
-import GuestRoute from "./components/GuestRoute";
-import Dashboard from "./routes/dashboard";
-
 import Root from './routes/root'
 import Register from './routes/register'
 import Login from './routes/login';
 import ProtectedRoute from './components/ProtectedRoute';
 import GuestRoute from './components/GuestRoute';
 import Dashboard from './routes/dashboard';
-import Notification from "@/routes/notification.tsx";
+import ProfilePage from './routes/profilePage';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
@@ -45,12 +38,20 @@ const router = createBrowserRouter([
         element: <ProtectedRoute element={<Notification />} />,
       },
       {
+        path: "account",
+        element: <ProtectedRoute element={<ProfilePage />} />,
+      },
+      {
         path: "menu",
         element: <ProtectedRoute element={<Menu/>} />,
       },
       {
         path: "tables",
         element: <ProtectedRoute element={<Tables/>} />,
+      },
+      {
+        path: "notifications",
+        element: <ProtectedRoute element={<Notification/>} />,
       }
     ]
   },
