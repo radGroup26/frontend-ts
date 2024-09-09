@@ -32,7 +32,6 @@ const navItems1 = [
 
 const navItems2 = [
     { icon: Bell, ariaLabel: "Notification", tooltip: "Notification", route: "/notifications" },
-    { icon: LifeBuoy, ariaLabel: "Help", tooltip: "Help", route: "/help" },
     { icon: SquareUser, ariaLabel: "Account", tooltip: "Account", route: "/account" },
 ];
 
