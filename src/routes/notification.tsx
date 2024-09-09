@@ -76,7 +76,7 @@ function Notification() {
         );
       } else {
         const response = await api.post(
-          "/api/notifications/add",
+          "/notifications/add",
           {
             title,
             message,
