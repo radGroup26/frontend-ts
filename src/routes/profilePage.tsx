@@ -22,7 +22,7 @@ import { Label } from "@/components/ui/label.tsx";
 const ProfilePage: React.FC = () => {
   const { user: authUser } = useAuth();
   const userID = authUser?.userId;
-  const [profile, setProfile] = useState<Profile>({ _id: '', first_name: '', last_name: '', role: '', email: '', userId: userID });
+  const [profile, setProfile] = useState<Profile | null>({ _id: '', first_name: '', last_name: '', role: '', email: '', userId: userID });
   const [isLoading, setIsLoading] = useState(true);
   const [newProfile, setNewProfile] = useState<Profile>({
     _id: '',
@@ -54,7 +54,7 @@ const ProfilePage: React.FC = () => {
           last_name: response.data.last_name,
           role: response.data.role,
           email: response.data.email,
-          userId: userID
+          userId: userID 
         });
         toast({
           title: "Profile Fetched",
@@ -74,7 +74,6 @@ const ProfilePage: React.FC = () => {
       });
     }
   };
-
   useEffect(() => {
     fetchProfile();
   }, []);
@@ -99,14 +98,7 @@ const ProfilePage: React.FC = () => {
       const updatedProfile = { ...newProfile, userId: userID };
       const response = await api.post('/profiles/create', updatedProfile);
       setProfile(newProfile);
-      setNewProfile({
-        _id: response.data._id,
-        first_name: response.data.first_name,
-        last_name: response.data.last_name,
-        role: response.data.role,
-        email: response.data.email,
-        userId: userID
-      });
+      setNewProfile(response.data);
       
       toast({
         title: "Profile created successfully",
@@ -129,17 +121,14 @@ const ProfilePage: React.FC = () => {
       return;
     }
     try {
-      const updatedProfile = { ...profile, userId: userID };
-      const response = await api.patch(`/profiles/update/${userID}`, updatedProfile);
-      setProfile(newProfile);
-      setNewProfile({
-        _id: response.data._id,
-        first_name: response.data.first_name,
-        last_name: response.data.last_name,
-        role: response.data.role,
-        email: response.data.email,
-        userId: userID
-      });
+      const updatedProfile = { ...profile };
+      const {data} = await api.post(`/profiles/update`, updatedProfile);
+
+      const resProfile = data.profile;
+      
+      setProfile({...resProfile});
+      fetchProfile();
+      setNewProfile({...resProfile});
       
       toast({
         title: "Profile Updated",
@@ -176,6 +165,7 @@ const ProfilePage: React.FC = () => {
         userId: ''
       });
       setProfile(newProfile);
+      fetchProfile();
 
       toast({
         title: "Profile Deleted",

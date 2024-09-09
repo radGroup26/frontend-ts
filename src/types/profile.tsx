@@ -4,5 +4,5 @@ export interface Profile {
     last_name: string,
     role: string,
     email: string,
-    userId: string
+    userId?: string
 }
